@@ -6,6 +6,8 @@ import { api } from '../lib/api';
 import { ChatMessage } from './ChatMessage';
 import { ChatInput } from './ChatInput';
 import { SparklesIcon, ExclamationCircleIcon, ArrowLeftIcon } from '@heroicons/react/24/solid';
+import { useSession } from 'next-auth/react';
+import Image from 'next/image';
 
 const messageVariants = {
   hidden: { opacity: 0, y: 20, scale: 0.95 },
@@ -22,22 +24,28 @@ export const ChatContainer = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const { id: sessionId } = router.query;
+  const { data: session, status } = useSession();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push('/auth/signin');
+      return;
+    }
+
     const initializeChat = async () => {
-      if (!router.isReady) return;
+      if (!router.isReady || status !== "authenticated") return;
 
       setIsInitializing(true);
       setError(null);
       
       try {
         if (router.pathname === '/chats' && !sessionId) {
-          const session = await api.createSession();
-          router.push(`/chats/${session.session_id}`, undefined, { shallow: true });
+          const newSession = await api.createSession();
+          router.push(`/chats/${newSession.session_id}`, undefined, { shallow: true });
         } else if (typeof sessionId === 'string') {
           const history = await api.getChatHistory(sessionId);
           setMessages(history);
@@ -56,7 +64,7 @@ export const ChatContainer = () => {
     };
 
     initializeChat();
-  }, [router.isReady, sessionId]);
+  }, [router.isReady, sessionId, status]);
 
   useEffect(() => {
     scrollToBottom();
@@ -155,26 +163,41 @@ export const ChatContainer = () => {
                 </div>
               </div>
             </div>
-            {isTyping && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-50 text-indigo-600"
-              >
-                <span className="text-sm font-medium font-sans">AI is thinking</span>
+            <div className="flex items-center gap-4">
+              {isTyping && (
                 <motion.div
-                  animate={{
-                    opacity: [0.4, 1, 0.4],
-                    transition: { duration: 1.5, repeat: Infinity },
-                  }}
-                  className="flex gap-1"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-50 text-indigo-600"
                 >
-                  <span>•</span>
-                  <span>•</span>
-                  <span>•</span>
+                  <span className="text-sm font-medium font-sans">AI is thinking</span>
+                  <motion.div
+                    animate={{
+                      opacity: [0.4, 1, 0.4],
+                      transition: { duration: 1.5, repeat: Infinity },
+                    }}
+                    className="flex gap-1"
+                  >
+                    <span>•</span>
+                    <span>•</span>
+                    <span>•</span>
+                  </motion.div>
                 </motion.div>
-              </motion.div>
-            )}
+              )}
+              {session?.user?.image && (
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-600">{session.user.name}</span>
+                  <div className="relative w-8 h-8 rounded-full overflow-hidden">
+                    <Image
+                      src={session.user.image}
+                      alt={session.user.name || 'User profile'}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </motion.div>

@@ -4,35 +4,67 @@ import { motion } from 'framer-motion';
 import { ChatSession } from '../../types/chat';
 import { api } from '../../lib/api';
 import { ChatBubbleLeftRightIcon, PlusIcon } from '@heroicons/react/24/outline';
+import { useSession } from 'next-auth/react';
 
 export default function ChatsPage() {
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+  const { data: session, status } = useSession();
 
   useEffect(() => {
-    const loadSessions = async () => {
-      try {
-        const data = await api.getAllSessions();
-        setSessions(data);
-      } catch (error) {
-        console.error('Failed to load sessions:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    if (status === "unauthenticated") {
+      router.push('/auth/signin');
+      return;
+    }
 
-    loadSessions();
-  }, []);
+    if (status === "authenticated") {
+      const loadSessions = async () => {
+        try {
+          const data = await api.getAllSessions();
+          setSessions(data);
+        } catch (error) {
+          console.error('Failed to load sessions:', error);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
+      loadSessions();
+    }
+  }, [status, router]);
 
   const handleCreateSession = async () => {
+    if (!session) {
+      router.push('/auth/signin');
+      return;
+    }
+
     try {
-      const session = await api.createSession();
-      router.push(`/chats/${session.session_id}`);
+      const newSession = await api.createSession();
+      router.push(`/chats/${newSession.session_id}`);
     } catch (error) {
       console.error('Failed to create session:', error);
     }
   };
+
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen bg-gradient-to-tr from-gray-50 to-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 mx-auto relative">
+            <div className="absolute inset-0 bg-indigo-500 rounded-full animate-ping opacity-20"></div>
+            <div className="relative w-full h-full border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+          </div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (status === "unauthenticated") {
+    return null; // Will redirect in useEffect
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-tr from-gray-50 to-gray-100">

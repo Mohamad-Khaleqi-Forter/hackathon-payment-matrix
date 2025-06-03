@@ -1,5 +1,7 @@
 import { motion } from 'framer-motion';
 import { UserCircleIcon } from '@heroicons/react/24/solid';
+import Image from 'next/image';
+import { useSession } from 'next-auth/react';
 
 interface ChatMessageProps {
   message: string;
@@ -8,6 +10,8 @@ interface ChatMessageProps {
 }
 
 export const ChatMessage = ({ message, isUser, timestamp }: ChatMessageProps) => {
+  const { data: session } = useSession();
+  
   return (
     <motion.div
       layout
@@ -39,8 +43,21 @@ export const ChatMessage = ({ message, isUser, timestamp }: ChatMessageProps) =>
       </div>
 
       {isUser && (
-        <div className="w-8 h-8 rounded-xl bg-gray-100 flex items-center justify-center flex-shrink-0">
-          <UserCircleIcon className="w-6 h-6 text-gray-600" />
+        <div className="w-8 h-8 rounded-xl overflow-hidden flex-shrink-0">
+          {session?.user?.image ? (
+            <div className="relative w-full h-full">
+              <Image
+                src={session.user.image}
+                alt={session.user.name || 'User profile'}
+                fill
+                className="object-cover"
+              />
+            </div>
+          ) : (
+            <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+              <UserCircleIcon className="w-6 h-6 text-gray-600" />
+            </div>
+          )}
         </div>
       )}
     </motion.div>
