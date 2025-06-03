@@ -4,6 +4,9 @@ import { ChatController } from '../controllers/chatController';
 const router = Router();
 const chatController = new ChatController();
 
+// List all sessions
+router.get('/', chatController.getAllSessions.bind(chatController));
+
 // Chat with product
 router.post('/:session_id', chatController.chatWithProduct.bind(chatController));
 

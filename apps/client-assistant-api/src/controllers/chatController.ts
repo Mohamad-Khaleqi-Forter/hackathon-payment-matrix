@@ -29,4 +29,14 @@ export class ChatController {
       res.status(500).json({ error: 'Failed to fetch chat history' });
     }
   }
+
+  async getAllSessions(req: Request, res: Response) {
+    try {
+      const sessions = chatService.getAllSessions();
+      res.json({ sessions });
+    } catch (error) {
+      console.error('Error fetching sessions:', error);
+      res.status(500).json({ error: 'Failed to fetch sessions' });
+    }
+  }
 } 
