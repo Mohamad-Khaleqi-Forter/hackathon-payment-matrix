@@ -3,8 +3,9 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 
 import { z } from "zod";
 
+
 const server = new McpServer({
-  name: "Merchants MCP Server",
+  name: "Merchants helpers server",
   version: "1.0.0",
   capabilities: {
     resources: {},
@@ -12,46 +13,10 @@ const server = new McpServer({
   },
 });
 
-server.tool(
-  "get-list-items",
-  "show list of items in the shop",
-  {
-    userEmail: z
-      .string()
-      .describe(
-        "user email to which the message will be sent"
-      ),
-  },
-  async ({ userEmail }) => {
-    try {
-      // send email
-
-      return {
-        content: [
-          {
-            type: "text",
-            text: `Message sent to email address: ${userEmail}`,
-          },
-        ],
-      };
-    } catch (error) {
-      console.error(error);
-
-      return {
-        content: [
-          {
-            type: "text",
-            text: `Something went wrong`,
-          },
-        ],
-      };
-    }
-  }
-);
 
 server.tool(
   "send-email",
-  "Send all of the chat and cotext via email to user using user email",
+  "send confirmation email to user using user email",
   {
     userEmail: z
       .string()
