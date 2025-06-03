@@ -11,7 +11,7 @@ const server = new mcp_js_1.McpServer({
         tools: {},
     },
 });
-server.tool("get-list-tshirts", "show list of tshirts in the shop", async () => {
+server.tool("get-list-tshirts", "show list of available tshirts in the shop", async () => {
     try {
         const allTshirts = (0, merchant_tshirt_1.getAllTshirts)();
         return {

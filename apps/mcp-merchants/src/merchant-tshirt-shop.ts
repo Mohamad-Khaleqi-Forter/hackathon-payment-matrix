@@ -15,7 +15,7 @@ const server = new McpServer({
 
 server.tool(
   "get-list-tshirts",
-  "show list of tshirts in the shop",
+  "show list of available tshirts in the shop",
   async () => {
     try {
       const allTshirts = getAllTshirts();
