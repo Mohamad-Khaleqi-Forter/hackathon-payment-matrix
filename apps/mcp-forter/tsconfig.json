@@ -1,10 +1,10 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "module": "node16",
-    "moduleResolution": "node16",
-    "outDir": "./.build",
-    "rootDir": "./src",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "outDir": ".build",
+    "rootDir": "src",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,

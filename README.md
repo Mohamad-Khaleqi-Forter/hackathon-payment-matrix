@@ -1,24 +1,52 @@
 # hackathon-payment-matrix
 
-Steps to make it work:
-- Instal nodejs in your laptop
-- Install dependenices `pnpm install` or use `npm install`
-- Build the project `pnpm run build`  or use `npm run build`
+## Local setup
+
+Install pnpm:
+
+```
+corepack enable
+corepack prepare pnpm@9.14.4 --activate
+```
+
+Install dependencies:
+
+```
+pnpm install
+```
+
+## Usage
+
+Build all apps:
+
+```
+pnpm build-apps
+```
+
+Start all apps:
+
+```
+pnpm start-apps
+```
+
+## Setting up Clause
+
 - Download Claude `https://claude.ai/download ` and login
 - Use following config in the setting:
+
 ```
 {
     "mcpServers": {
         "forter-payments-orchestration": {
             "command": "node",
             "args": [
-                "/Users/laptop-username/Desktop/code/hackathon/.build/forter-payments-orchestration.js"
+                "/<path>/apps/mcp-forter/.build/forter-payments.js"
             ]
         },
-        "merchants-webiste": {
+        "merchants-a-catalog": {
             "command": "node",
             "args": [
-                "/Users/laptop-username/Desktop/code/hackathon/.build/merchants-shop.js"
+                "/<path>//apps/mcp-merchants/.build/merchant-a-shop.js"
             ]
         }
     }
