@@ -5,4 +5,4 @@ node_modules
 !apps/mcp-merchants/.build
 !apps/mcp-forter/.build
 
-.env.local
+.env
