@@ -1,6 +1,7 @@
 {
   "name": "@hackathon-project/client-assistant-api",
   "version": "1.0.0",
+  "private": true,
   "description": "MCP Backend for the Marketplace",
   "main": "dist/index.js",
   "scripts": {
@@ -20,6 +21,8 @@
     "dotenv": "^16.4.5",
     "express": "^4.18.3",
     "ts-node-dev": "^2.0.0",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "ai": "^4.3.16",
+    "@ai-sdk/google": "^1.2.19"
   }
 }
