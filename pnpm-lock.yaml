@@ -8,6 +8,10 @@ importers:
 
   .: {}
 
+  apps/client-assistant: {}
+
+  apps/client-assistant-api: {}
+
   apps/mcp-forter:
     dependencies:
       '@modelcontextprotocol/sdk':
