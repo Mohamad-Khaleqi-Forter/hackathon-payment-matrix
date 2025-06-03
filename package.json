@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start-apps": "pnpm -r --filter '@hackathon-project/*' run start --parallel",
+    "start-apps": "pnpm -r --filter '@hackathon-project/*' run start",
     "build-apps": "pnpm -r --filter '@hackathon-project/*' run build",
     "remove-node-modules": "npx npkill"
   },
