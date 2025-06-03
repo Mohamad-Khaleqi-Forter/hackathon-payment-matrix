@@ -13,7 +13,7 @@ const server = new McpServer({
   },
 });
 
-const FORTER_PAYMENTS_ORCHESTRATION_URL = "http://localhost:3000";
+const FORTER_PAYMENTS_ORCHESTRATION_URL = process.env.FORTER_PAYMENTS_ORCHESTRATION_URL || "http://localhost:3000";
 const CurrencySchema = z.enum(['USD', 'EUR' , 'GBP']); 
 type CurrencyType = z.infer<typeof CurrencySchema>;
 export const generatePaymentCreateRequest = (
