@@ -1,14 +1,14 @@
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
-import productRoutes from './routes/productRoutes';
-import chatRoutes from './routes/chatRoutes';
+import * as dotenv from 'dotenv';
+import productRoutes from './routes/productRoutes.js';
+import chatRoutes from './routes/chatRoutes.js';
 
 // Load environment variables
 dotenv.config();
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.CLIENT_ASSISTANT_API_PORT || 3000;
 
 // Middleware
 app.use(cors());

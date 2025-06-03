@@ -1,14 +1,8 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.generatePaymentCreateRequest = void 0;
-const mcp_js_1 = require("@modelcontextprotocol/sdk/server/mcp.js");
-const stdio_js_1 = require("@modelcontextprotocol/sdk/server/stdio.js");
-const axios_1 = __importDefault(require("axios"));
-const zod_1 = require("zod");
-const server = new mcp_js_1.McpServer({
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import axios from 'axios';
+import { z } from "zod";
+const server = new McpServer({
     name: "Forter MCP Server",
     version: "1.0.0",
     capabilities: {
@@ -17,8 +11,8 @@ const server = new mcp_js_1.McpServer({
     },
 });
 const FORTER_PAYMENTS_ORCHESTRATION_URL = "http://localhost:3000";
-const CurrencySchema = zod_1.z.enum(['USD', 'EUR', 'GBP']);
-const generatePaymentCreateRequest = (amount = 2000, currency = "USD", cardNumber = '4242424242424242') => {
+const CurrencySchema = z.enum(['USD', 'EUR', 'GBP']);
+export const generatePaymentCreateRequest = (amount = 2000, currency = "USD", cardNumber = '4242424242424242') => {
     return {
         cartItems: [],
         amount,
@@ -37,16 +31,44 @@ const generatePaymentCreateRequest = (amount = 2000, currency = "USD", cardNumbe
         captureMethod: 'automatic',
     };
 };
-exports.generatePaymentCreateRequest = generatePaymentCreateRequest;
+server.tool("send-message", "Send message using a chat id", {
+    chatId: z
+        .string()
+        .describe("Unique identifier for the target chat or username of the target channel"),
+    text: z.string().describe("Message the user want to send to chat id"),
+}, async ({ chatId, text }) => {
+    try {
+        console.log(`Sending message to chat id: ${chatId}`);
+        return {
+            content: [
+                {
+                    type: "text",
+                    text: `Message sent to telegram user chat id: ${chatId}`,
+                },
+            ],
+        };
+    }
+    catch (error) {
+        console.error(error);
+        return {
+            content: [
+                {
+                    type: "text",
+                    text: `Something went wrong`,
+                },
+            ],
+        };
+    }
+});
 server.tool("payment-create", "pay for an item with given amount and currency", {
-    amount: zod_1.z
+    amount: z
         .number()
         .describe("amount in cents to pay for the item, e.g. 2000 for $20.00"),
     currency: CurrencySchema.default("USD").describe("currency of the payment"),
 }, async ({ amount, currency }) => {
-    const paymentPayload = (0, exports.generatePaymentCreateRequest)(amount, currency);
+    const paymentPayload = generatePaymentCreateRequest(amount, currency);
     try {
-        const PaymentResponse = await axios_1.default.post(`${FORTER_PAYMENTS_ORCHESTRATION_URL}/payments`, paymentPayload);
+        const PaymentResponse = await axios.post(`${FORTER_PAYMENTS_ORCHESTRATION_URL}/payments`, paymentPayload);
         return {
             content: [
                 {
@@ -69,7 +91,7 @@ server.tool("payment-create", "pay for an item with given amount and currency", 
     }
 });
 async function main() {
-    const transport = new stdio_js_1.StdioServerTransport();
+    const transport = new StdioServerTransport();
     await server.connect(transport);
 }
 main().catch((error) => {

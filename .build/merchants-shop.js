@@ -1,9 +1,7 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-const mcp_js_1 = require("@modelcontextprotocol/sdk/server/mcp.js");
-const stdio_js_1 = require("@modelcontextprotocol/sdk/server/stdio.js");
-const zod_1 = require("zod");
-const server = new mcp_js_1.McpServer({
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { z } from "zod";
+const server = new McpServer({
     name: "Merchants MCP Server",
     version: "1.0.0",
     capabilities: {
@@ -12,7 +10,7 @@ const server = new mcp_js_1.McpServer({
     },
 });
 server.tool("get-list-items", "show list of items in the shop", {
-    userEmail: zod_1.z
+    userEmail: z
         .string()
         .describe("user email to which the message will be sent"),
 }, async ({ userEmail }) => {
@@ -40,7 +38,7 @@ server.tool("get-list-items", "show list of items in the shop", {
     }
 });
 server.tool("send-email", "Send all of the chat and cotext via email to user using user email", {
-    userEmail: zod_1.z
+    userEmail: z
         .string()
         .describe("user email to which the message will be sent"),
 }, async ({ userEmail }) => {
@@ -68,7 +66,7 @@ server.tool("send-email", "Send all of the chat and cotext via email to user usi
     }
 });
 async function main() {
-    const transport = new stdio_js_1.StdioServerTransport();
+    const transport = new StdioServerTransport();
     await server.connect(transport);
 }
 main().catch((error) => {

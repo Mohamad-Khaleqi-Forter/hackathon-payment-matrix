@@ -1,6 +1,6 @@
 export interface Message {
   role: 'user' | 'assistant';
-  content: string | Record<string, any>;
+  content: string;
 }
 
 interface ChatSession {
@@ -16,9 +16,8 @@ export interface SessionInfo {
 
 export class ChatSessionService {
   private sessions: Map<string, ChatSession> = new Map();
-
   private readonly SESSION_TIMEOUT = 60 * 60 * 1000; // 1 hour
-  private readonly MAX_MESSAGES_PER_SESSION = 10_000; // Maximum number of messages per session
+  private readonly MAX_MESSAGES_PER_SESSION = 500; // Maximum number of messages per session
 
   constructor() {
     setInterval(() => this.cleanupOldSessions(), this.SESSION_TIMEOUT);

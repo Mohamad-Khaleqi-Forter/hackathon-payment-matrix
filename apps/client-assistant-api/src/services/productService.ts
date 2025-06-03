@@ -1,4 +1,4 @@
-import { Product, ProductSearchParams } from '../types/product';
+import { Product, ProductSearchParams } from '../types/product.js';
 
 // Mock data for demonstration
 const mockProducts: Product[] = [

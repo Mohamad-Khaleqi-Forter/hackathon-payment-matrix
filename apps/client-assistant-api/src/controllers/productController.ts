@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import { ProductService } from '../services/productService';
-import { ProductSearchParams } from '../types/product';
+import { ProductService } from '../services/productService.js';
+import { ProductSearchParams } from '../types/product.js';
 
 const productService = new ProductService();
 

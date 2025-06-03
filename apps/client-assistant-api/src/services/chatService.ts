@@ -1,17 +1,21 @@
-import {
-  experimental_createMCPClient as createMCPClient,
-  generateText,
-} from "ai";
-import { Experimental_StdioMCPTransport as StdioMCPTransport } from "ai/mcp-stdio";
 import { google } from "@ai-sdk/google";
-import { ChatSessionService, Message, SessionInfo } from "./chatSessionService";
+import {
+  ChatSessionService,
+  Message,
+  SessionInfo,
+} from "./chatSessionService.js";
+import { Agent } from "@mastra/core/agent";
+import { ChatToolsService } from "./chatToolsService.js";
+
+const LLM_MODEL = google("models/gemini-2.0-flash-exp");
 
 export class ChatService {
-  private model: string = "models/gemini-2.0-flash-exp";
-  private sessionService: ChatSessionService;
+  private chatSessionService: ChatSessionService;
+  private chatToolsService: ChatToolsService;
 
   constructor() {
-    this.sessionService = new ChatSessionService();
+    this.chatSessionService = new ChatSessionService();
+    this.chatToolsService = new ChatToolsService();
     this.validateConfig();
   }
 
@@ -23,94 +27,46 @@ export class ChatService {
     }
   }
 
-  private async getMCPTools() {
-    const mcpMerchantShoes = await createMCPClient({
-      transport: new StdioMCPTransport({
-        command: "node",
-        args: [process.env.MCP_TOOLS_MERCHANT_SHOES_PATH!],
-      }),
-    });
-
-    const mcpMerchantTshirt = await createMCPClient({
-      transport: new StdioMCPTransport({
-        command: "node",
-        args: [process.env.MCP_TOOLS_MERCHANT_TSHIRT_PATH!],
-      }),
-    });
-
-    const mcpMerchantHelpers = await createMCPClient({
-      transport: new StdioMCPTransport({
-        command: "node",
-        args: [process.env.MCP_TOOLS_MERCHANT_HELPERS_PATH!],
-      }),
-    });
-
-    const mcpForter = await createMCPClient({
-      transport: new StdioMCPTransport({
-        command: "node",
-        args: [process.env.MCP_TOOLS_FORTER_PATH!],
-      }),
-    });
-
-    const toolMerchantShoes = await mcpMerchantShoes.tools();
-    const toolsMerchantHelpers = await mcpMerchantHelpers.tools();
-    const toolMerchantTshirt = await mcpMerchantTshirt.tools();
-    const toolForter = await mcpForter.tools();
-
-    return {
-      ...toolMerchantShoes,
-      ...toolMerchantTshirt,
-      ...toolsMerchantHelpers,
-      ...toolForter,
-    };
-  }
-
   async generateResponse(session_id: string, text: string) {
     try {
       // Add user message to history
-      this.sessionService.addMessage(session_id, {
+      this.chatSessionService.addMessage(session_id, {
         role: "user",
         content: text,
       });
 
       // Construct the conversation context
-      const conversationContext = this.sessionService
+      const conversationContext = this.chatSessionService
         .getHistory(session_id)
         .map((msg) => `${msg.role}: ${msg.content}`)
         .join("\n");
 
-      const response = await generateText({
-        model: google(this.model),
-        prompt: conversationContext,
-        tools: await this.getMCPTools(),
+      const agent = new Agent({
+        name: "Remote Tool Agent",
+        instructions: `
+You assist users by utilizing remote tools.
+Your responses must always be formatted as **Markdown**, making them easy to read and visually structured in chat.
+
+Follow these formatting rules:
+- Use \`#\`, \`##\`, etc. for headings when introducing sections.
+- Enclose code, tool output, or JSON in triple backtick blocks (e.g. \`\`\`json).
+- Use bullet points (• or -) for lists.
+- Use tables for tabular data.
+- Bold key values or field names where helpful.
+- Do not return raw, unformatted data.
+- Never explain formatting – just format it correctly.
+
+Keep your responses concise, helpful, and structured.
+`,
+        model: LLM_MODEL,
+        tools: await this.chatToolsService.getTools(),
       });
 
-      console.log("Response from LLM:");
-      console.log(JSON.stringify(response));
-
-      let output: string | Record<string, any> =
-        response.text ?? "No response generated";
-
-      if (response.steps) {
-        output = response.steps.reverse().flatMap((step) => {
-          return step.toolResults.map((toolResult) => {
-            if (!toolResult.result || !toolResult.toolName) {
-              return {
-                toolName: toolResult.toolName ?? "Unknown Tool",
-                content: "No response generated",
-              };
-            }
-
-            return {
-              toolName: toolResult.toolName,
-              content: toolResult.result.content,
-            };
-          });
-        });
-      }
+      const response = await agent.generate(conversationContext);
+      const output: string = response.text ?? "No response generated";
 
       // Add assistant response to history
-      this.sessionService.addMessage(session_id, {
+      this.chatSessionService.addMessage(session_id, {
         role: "assistant",
         content: output,
       });
@@ -123,10 +79,10 @@ export class ChatService {
   }
 
   getSessionHistory(session_id: string): Message[] {
-    return this.sessionService.getHistory(session_id);
+    return this.chatSessionService.getHistory(session_id);
   }
 
   getAllSessions(): SessionInfo[] {
-    return this.sessionService.getAllSessions();
+    return this.chatSessionService.getAllSessions();
   }
 }
