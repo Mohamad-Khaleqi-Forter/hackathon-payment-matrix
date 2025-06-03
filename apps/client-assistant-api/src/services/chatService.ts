@@ -70,19 +70,50 @@ export class ChatService {
         .map((msg) => `${msg.role}: ${msg.content}`)
         .join("\n");
 
-      const { text: response } = await generateText({
+      const response = await generateText({
         model: google(this.model),
         prompt: conversationContext,
-        tools: await this.getMCPTools()
+        tools: await this.getMCPTools(),
       });
+
+      let outputText = "";
+
+      // Iterate through steps to extract text and tool results
+      for (const step of response.steps) {
+        // Add any direct text output from the step
+        if (step.text) {
+          outputText += step.text + "\n\n";
+        }
+
+        // Check for tool calls and their results
+        if (step.toolCalls && step.toolResults) {
+          for (const toolResult of step.toolResults) {
+            const toolName = toolResult.toolName;
+            const result = toolResult.result;
+
+            // Format tool result as markdown
+            outputText += `### Tool Call: ${toolName}\n`;
+            outputText += `**Result**:\n\`\`\`\n${JSON.stringify(
+              result,
+              null,
+              2
+            )}\n\`\`\`\n\n`;
+          }
+        }
+      }
+
+      // If the final response has a summarized text, use it
+      if (response.text) {
+        outputText += `### Final Response\n${response.text}\n`;
+      }
 
       // Add assistant response to history
       this.sessionService.addMessage(session_id, {
         role: "assistant",
-        content: response,
+        content: outputText,
       });
 
-      return response || "No response generated";
+      return outputText || "No response generated";
     } catch (error) {
       console.error("Error generating response:", error);
       throw new Error("Failed to generate response from LLM");
