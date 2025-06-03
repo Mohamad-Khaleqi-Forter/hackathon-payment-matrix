@@ -42,45 +42,6 @@ export const generatePaymentCreateRequest = (
 
 
 server.tool(
-  "send-message",
-  "Send message using a chat id",
-  {
-    chatId: z
-      .string()
-      .describe(
-        "Unique identifier for the target chat or username of the target channel"
-      ),
-    text: z.string().describe("Message the user want to send to chat id"),
-  },
-  async ({ chatId, text }) => {
-    try {
-      console.log(`Sending message to chat id: ${chatId}`);
-
-      return {
-        content: [
-          {
-            type: "text",
-            text: `Message sent to telegram user chat id: ${chatId}`,
-          },
-        ],
-      };
-    } catch (error) {
-      console.error(error);
-
-      return {
-        content: [
-          {
-            type: "text",
-            text: `Something went wrong`,
-          },
-        ],
-      };
-    }
-  }
-);
-
-
-server.tool(
   "payment-create",
   "pay for an item with given amount and currency",
   {
