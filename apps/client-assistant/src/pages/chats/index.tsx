@@ -28,7 +28,7 @@ export default function ChatsPage() {
   const handleCreateSession = async () => {
     try {
       const session = await api.createSession();
-      router.push(`/chats/${session.id}`);
+      router.push(`/chats/${session.session_id}`);
     } catch (error) {
       console.error('Failed to create session:', error);
     }
@@ -68,12 +68,12 @@ export default function ChatsPage() {
           ) : sessions.length > 0 ? (
             sessions.map((session) => (
               <motion.div
-                key={session.id}
+                key={session.session_id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() => router.push(`/chats/${session.id}`)}
+                onClick={() => router.push(`/chats/${session.session_id}`)}
                 className="bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-200 cursor-pointer border border-gray-100"
               >
                 <div className="flex items-center gap-4">
@@ -82,14 +82,14 @@ export default function ChatsPage() {
                   </div>
                   <div className="flex-1">
                     <h3 className="font-medium text-gray-900">
-                      Chat Session {session.id.slice(0, 8)}
+                      Chat Session {session.session_id.slice(0, 8)}
                     </h3>
                     <p className="text-sm text-gray-500">
-                      {new Date(session.updatedAt).toLocaleString()}
+                      {new Date(session.lastActivity).toLocaleString()}
                     </p>
                   </div>
                   <div className="text-sm text-gray-500">
-                    {session.messages.length} messages
+                    {session.messageCount} messages
                   </div>
                 </div>
               </motion.div>

@@ -1,14 +1,22 @@
 export interface ChatMessage {
-  id: string;
-  text: string;
-  isUser: boolean;
-  timestamp: string;
-  sessionId: string;
+  role: 'user' | 'assistant';
+  content?: string;
 }
 
 export interface ChatSession {
-  id: string;
-  createdAt: string;
-  updatedAt: string;
-  messages: ChatMessage[];
+  session_id: string;
+  messageCount: number;
+  lastActivity: string;
+}
+
+export interface ChatHistory {
+  history: ChatMessage[];
+}
+
+export interface ChatResponse {
+  response: string;
+}
+
+export interface ChatSessionsResponse {
+  sessions: ChatSession[];
 } 
