@@ -6,23 +6,44 @@ settings:
 
 importers:
 
-  .:
+  .: {}
+
+  apps/mcp-forter:
     dependencies:
       '@modelcontextprotocol/sdk':
-        specifier: ^1.12.1
+        specifier: 1.12.1
         version: 1.12.1
       axios:
-        specifier: ^1.9.0
+        specifier: 1.9.0
         version: 1.9.0
       zod:
-        specifier: ^3.25.48
+        specifier: 3.25.48
         version: 3.25.48
     devDependencies:
       '@types/node':
-        specifier: ^22.15.29
+        specifier: 22.15.29
         version: 22.15.29
       typescript:
-        specifier: ^5.8.3
+        specifier: 5.8.3
+        version: 5.8.3
+
+  apps/mcp-merchants:
+    dependencies:
+      '@modelcontextprotocol/sdk':
+        specifier: 1.12.1
+        version: 1.12.1
+      axios:
+        specifier: 1.9.0
+        version: 1.9.0
+      zod:
+        specifier: 3.25.48
+        version: 3.25.48
+    devDependencies:
+      '@types/node':
+        specifier: 22.15.29
+        version: 22.15.29
+      typescript:
+        specifier: 5.8.3
         version: 5.8.3
 
 packages:

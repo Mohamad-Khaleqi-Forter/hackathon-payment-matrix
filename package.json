@@ -1,20 +1,11 @@
 {
   "name": "hackathon-project",
   "version": "1.0.0",
-  "license": "MIT",
-  "main": "index.js",
-  "type": "module",
+  "private": true,
   "scripts": {
-    "build": "npx tsc"
+    "start-apps": "pnpm -r --filter '@hackathon-project/*' run start --parallel",
+    "build-apps": "pnpm -r --filter '@hackathon-project/*' run build",
+    "remove-node-modules": "npx npkill"
   },
-  "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.12.1",
-    "axios": "^1.9.0",
-    "zod": "^3.25.48"
-  },
-  "devDependencies": {
-    "@types/node": "^22.15.29",
-    "typescript": "^5.8.3"
-  },
-  "packageManager": "pnpm@9.14.4+sha512.c8180b3fbe4e4bca02c94234717896b5529740a6cbadf19fa78254270403ea2f27d4e1d46a08a0f56c89b63dc8ebfd3ee53326da720273794e6200fcf0d184ab"
+  "packageManager": "pnpm@9.14.4"
 }
