@@ -11,14 +11,15 @@ export default function ChatsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
   const { data: session, status } = useSession();
+  const isMockAuth = process.env.NEXT_PUBLIC_MOCK_AUTH === "true";
 
   useEffect(() => {
-    if (status === "unauthenticated") {
+    if (status === "unauthenticated" && !isMockAuth) {
       router.push('/auth/signin');
       return;
     }
 
-    if (status === "authenticated") {
+    if (status === "authenticated" || isMockAuth) {
       const loadSessions = async () => {
         try {
           const data = await api.getAllSessions();
@@ -32,10 +33,10 @@ export default function ChatsPage() {
 
       loadSessions();
     }
-  }, [status, router]);
+  }, [status, router, isMockAuth]);
 
   const handleCreateSession = async () => {
-    if (!session) {
+    if (!session && !isMockAuth) {
       router.push('/auth/signin');
       return;
     }
@@ -48,7 +49,7 @@ export default function ChatsPage() {
     }
   };
 
-  if (status === "loading") {
+  if (status === "loading" && !isMockAuth) {
     return (
       <div className="min-h-screen bg-gradient-to-tr from-gray-50 to-gray-100 flex items-center justify-center">
         <div className="text-center">
@@ -62,7 +63,7 @@ export default function ChatsPage() {
     );
   }
 
-  if (status === "unauthenticated") {
+  if (status === "unauthenticated" && !isMockAuth) {
     return null; // Will redirect in useEffect
   }
 

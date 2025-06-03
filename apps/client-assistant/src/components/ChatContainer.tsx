@@ -25,19 +25,20 @@ export const ChatContainer = () => {
   const router = useRouter();
   const { id: sessionId } = router.query;
   const { data: session, status } = useSession();
+  const isMockAuth = process.env.NEXT_PUBLIC_MOCK_AUTH === "true";
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   useEffect(() => {
-    if (status === "unauthenticated") {
+    if (status === "unauthenticated" && !isMockAuth) {
       router.push('/auth/signin');
       return;
     }
 
     const initializeChat = async () => {
-      if (!router.isReady || status !== "authenticated") return;
+      if (!router.isReady || (status !== "authenticated" && !isMockAuth)) return;
 
       setIsInitializing(true);
       setError(null);
@@ -64,7 +65,7 @@ export const ChatContainer = () => {
     };
 
     initializeChat();
-  }, [router.isReady, sessionId, status]);
+  }, [router.isReady, sessionId, status, isMockAuth]);
 
   useEffect(() => {
     scrollToBottom();
@@ -76,7 +77,7 @@ export const ChatContainer = () => {
   };
 
   const handleSendMessage = async (text: string) => {
-    if (!sessionId || typeof sessionId !== 'string') return;
+    if (!sessionId || typeof sessionId !== 'string' || (!session && !isMockAuth)) return;
 
     try {
       setIsLoading(true);
@@ -131,11 +132,11 @@ export const ChatContainer = () => {
 
   return (
     <div className="flex flex-col h-[calc(100vh-4rem)] bg-transparent relative">
-      <motion.div
+    <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         className="glass sticky top-0 z-20 border-b border-gray-100"
-      >
+    >
         <div className="max-w-5xl mx-auto">
           <div className="flex items-center justify-between px-6 py-4">
             <div className="flex items-center gap-4">
@@ -160,8 +161,8 @@ export const ChatContainer = () => {
                       Session: {typeof sessionId === 'string' ? sessionId.slice(0, 8) : ''}
                     </p>
                   )}
-                </div>
-              </div>
+        </div>
+      </div>
             </div>
             <div className="flex items-center gap-4">
               {isTyping && (
@@ -202,10 +203,10 @@ export const ChatContainer = () => {
         </div>
       </motion.div>
 
-      {error && (
-        <motion.div
+          {error && (
+            <motion.div
           initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
+              animate={{ opacity: 1, y: 0 }}
           className="mx-4 mt-4"
         >
           <div className="max-w-5xl mx-auto">
@@ -216,8 +217,8 @@ export const ChatContainer = () => {
               </div>
             </div>
           </div>
-        </motion.div>
-      )}
+            </motion.div>
+          )}
 
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-5xl mx-auto px-4 py-6 space-y-6">

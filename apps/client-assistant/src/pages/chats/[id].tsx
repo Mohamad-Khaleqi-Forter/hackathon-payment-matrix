@@ -6,14 +6,15 @@ import { useEffect } from 'react';
 export default function ChatPage() {
   const { status } = useSession();
   const router = useRouter();
+  const isMockAuth = process.env.NEXT_PUBLIC_MOCK_AUTH === "true";
 
   useEffect(() => {
-    if (status === "unauthenticated") {
+    if (status === "unauthenticated" && !isMockAuth) {
       router.push('/auth/signin');
     }
-  }, [status, router]);
+  }, [status, router, isMockAuth]);
 
-  if (status === "loading") {
+  if (status === "loading" && !isMockAuth) {
     return (
       <div className="min-h-screen bg-gradient-to-tr from-gray-50 to-gray-100 flex items-center justify-center">
         <div className="text-center">
@@ -27,7 +28,7 @@ export default function ChatPage() {
     );
   }
 
-  if (status === "unauthenticated") {
+  if (status === "unauthenticated" && !isMockAuth) {
     return null; // Will redirect in useEffect
   }
 

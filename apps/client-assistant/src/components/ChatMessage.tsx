@@ -2,6 +2,9 @@ import { motion } from 'framer-motion';
 import { UserCircleIcon } from '@heroicons/react/24/solid';
 import Image from 'next/image';
 import { useSession } from 'next-auth/react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import type { Components } from 'react-markdown';
 
 interface ChatMessageProps {
   message: string;
@@ -9,8 +12,51 @@ interface ChatMessageProps {
   timestamp: string;
 }
 
+const preprocessMessage = (text: string): string => {
+  // Replace bullet points followed by space with proper markdown list items
+  text = text.replace(/[•●] /g, '- ');
+  
+  // Ensure there are proper line breaks before and after lists
+  text = text.replace(/\n[-•●]/g, '\n\n-');
+  
+  // Add line breaks between sentences that start with bullet points
+  text = text.replace(/\. [-•●]/g, '.\n\n-');
+  
+  // Ensure double line breaks before lists
+  text = text.replace(/([^\\n])\n+[-•●]/g, '$1\n\n-');
+  
+  // Add double line breaks after colons that precede lists
+  text = text.replace(/:\n*([-•●])/g, ':\n\n$1');
+  
+  // Ensure proper spacing around headings (lines ending with :)
+  text = text.replace(/:\n([^\n])/g, ':\n\n$1');
+  
+  return text;
+};
+
 export const ChatMessage = ({ message, isUser, timestamp }: ChatMessageProps) => {
   const { data: session } = useSession();
+
+  const markdownComponents: Components = {
+    p: ({children}) => <p className="mb-2 last:mb-0">{children}</p>,
+    strong: ({children}) => <strong className="font-semibold">{children}</strong>,
+    ul: ({children}) => <ul className="list-disc ml-4 mb-2">{children}</ul>,
+    ol: ({children}) => <ol className="list-decimal ml-4 mb-2">{children}</ol>,
+    li: ({children}) => <li className="mb-1">{children}</li>,
+    a: ({children, href}) => (
+      <a 
+        href={href}
+        className={`underline ${isUser ? 'text-white' : 'text-primary-600'}`}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {children}
+      </a>
+    ),
+    code: ({children}) => (
+      <code className="bg-opacity-20 bg-gray-800 rounded px-1">{children}</code>
+    ),
+  };
   
   return (
     <motion.div
@@ -33,9 +79,14 @@ export const ChatMessage = ({ message, isUser, timestamp }: ChatMessageProps) =>
             shadow-sm
           `}
         >
-          <p className={`font-sans text-[15px] leading-relaxed ${isUser ? 'text-white' : 'text-gray-700'}`}>
-            {message}
-          </p>
+          <div className={`font-sans text-[15px] leading-relaxed ${isUser ? 'text-white' : 'text-gray-700'} markdown-content`}>
+            <ReactMarkdown 
+              remarkPlugins={[remarkGfm]}
+              components={markdownComponents}
+            >
+              {preprocessMessage(message)}
+            </ReactMarkdown>
+          </div>
         </motion.div>
         <span className="text-xs text-gray-400 mt-1 px-2 font-sans">
           {timestamp}

@@ -15,23 +15,25 @@ Install dependencies:
 pnpm install
 ```
 
-## Usage
-
-Build all apps:
+Build and start all apps:
 
 ```
 pnpm build-apps
-```
-
-Start all apps:
-
-```
 pnpm start-apps
 ```
 
+## Usage
+
+Navigate http://localhost:3000/ \
+Example prompts:
+
+- give me a list of tshirt
+- i want the ones priced less than $23
+- now buy all of above
+
 ## Setting up Google gemini
 
-Navigate to https://aistudio.google.com/prompts/new_chat and create new API key using "Get API key".
+Navigate to https://aistudio.google.com/prompts/new_chat and create new API key using "Get API key".\
 Then update it under .env as `GOOGLE_GENERATIVE_AI_API_KEY`.
 
 ## Setting up Clause
