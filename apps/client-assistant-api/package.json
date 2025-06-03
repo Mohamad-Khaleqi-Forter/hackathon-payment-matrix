@@ -1,28 +1,28 @@
 {
-  "name": "client-assistant-api",
+  "name": "@hackathon-project/client-assistant-api",
   "version": "1.0.0",
-  "description": "Backend API for the AI shopping assistant",
+  "private": true,
+  "description": "MCP Backend for the Marketplace",
   "main": "dist/index.js",
   "scripts": {
-    "dev": "ts-node-dev --respawn src/index.ts",
+    "start": "node dist/index.js",
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "build": "tsc",
-    "start": "node dist/index.js"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "UNLICENSED",
   "dependencies": {
-    "@types/dotenv": "^6.1.1",
-    "cors": "^2.8.5",
-    "dotenv": "^16.5.0",
-    "express": "^4.18.2",
-    "openai": "^5.0.2"
-  },
-  "devDependencies": {
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
-    "@types/node": "^20.11.16",
+    "@types/node": "^20.11.24",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.18.3",
     "ts-node-dev": "^2.0.0",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "ai": "^4.3.16",
+    "@ai-sdk/google": "^1.2.19"
   }
 }

@@ -8,7 +8,7 @@ import chatRoutes from './routes/chatRoutes';
 dotenv.config();
 
 const app = express();
-const port = process.env.PORT || 3001;
+const port = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors());
@@ -16,14 +16,14 @@ app.use(express.json());
 
 // Routes
 app.use('/api/products', productRoutes);
-app.use('/api', chatRoutes);
+app.use('/api/chat', chatRoutes);
 
 // Basic health check endpoint
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok', message: 'API Server is running' });
+  res.json({ status: 'ok', message: 'MCP Backend is running' });
 });
 
 // Start server
 app.listen(port, () => {
-  console.log(`API server is running on port ${port}`);
+  console.log(`MCP Backend server is running on port ${port}`);
 }); 
