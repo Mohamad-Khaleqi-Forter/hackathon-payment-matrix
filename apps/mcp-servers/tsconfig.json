@@ -10,6 +10,6 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "apps/mcp-servers/forter-payments-orchestration.ts", "apps/mcp-servers/merchants-shop.ts"],
   "exclude": ["node_modules"]
 }
