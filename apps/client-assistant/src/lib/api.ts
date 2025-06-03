@@ -38,7 +38,7 @@ export const api = {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ message }),
+      body: JSON.stringify({ text: message }),
     });
     if (!response.ok) throw new Error('Failed to send message');
     return response.json();
