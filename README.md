@@ -29,6 +29,11 @@ Start all apps:
 pnpm start-apps
 ```
 
+## Setting up Google gemini
+
+Navigate to https://aistudio.google.com/prompts/new_chat and create new API key using "Get API key".
+Then update it under .env as `GOOGLE_GENERATIVE_AI_API_KEY`.
+
 ## Setting up Clause
 
 - Download Claude `https://claude.ai/download ` and login

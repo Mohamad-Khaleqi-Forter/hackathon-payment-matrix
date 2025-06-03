@@ -12,8 +12,8 @@ export class ChatService {
   }
 
   private validateConfig() {
-    if (!process.env.GOOGLE_API_KEY) {
-      throw new Error('GOOGLE_API_KEY environment variable is not set');
+    if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
+      throw new Error('GOOGLE_GENERATIVE_AI_API_KEY environment variable is not set');
     }
   }
 
