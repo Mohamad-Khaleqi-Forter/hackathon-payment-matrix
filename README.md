@@ -42,16 +42,28 @@ Then update it under .env as `GOOGLE_GENERATIVE_AI_API_KEY`.
 ```
 {
     "mcpServers": {
+        "merchants-utils": {
+            "command": "node",
+            "args": [
+                "/...correct the path/mcp-merchants/.build/merchant-helpers.js"
+            ]
+        },
+        "merchants-shoes": {
+            "command": "node",
+            "args": [
+                "/...correct the path/mcp-merchants/.build/merchant-shoes-shop.js"
+            ]
+        },
+         "merchant-tshirt": {
+            "command": "node",
+            "args": [
+                "/...correct the path/mcp-merchants/.build/merchant-tshirt-shop.js"
+            ]
+        },
         "forter-payments-orchestration": {
             "command": "node",
             "args": [
-                "/<path>/apps/mcp-forter/.build/forter-payments.js"
-            ]
-        },
-        "merchants-a-catalog": {
-            "command": "node",
-            "args": [
-                "/<path>//apps/mcp-merchants/.build/merchant-a-shop.js"
+                "/...correct the path/mcp-forter/.build/forter-payments.js"
             ]
         }
     }
