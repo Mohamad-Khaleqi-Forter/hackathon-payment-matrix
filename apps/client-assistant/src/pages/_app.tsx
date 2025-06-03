@@ -1,3 +1,4 @@
+import { SessionProvider } from "next-auth/react";
 import type { AppProps } from 'next/app';
 import { Outfit, DM_Sans } from "next/font/google";
 import Head from 'next/head';
@@ -16,9 +17,9 @@ const dmSans = DM_Sans({
   display: 'swap',
 });
 
-export default function App({ Component, pageProps }: AppProps) {
+export default function App({ Component, pageProps: { session, ...pageProps } }: AppProps) {
   return (
-    <>
+    <SessionProvider session={session}>
       <Head>
         <title>AI Shopping Assistant - Forter Demo</title>
         <meta name="description" content="An AI-powered shopping assistant that helps you find and purchase products seamlessly." />
@@ -28,6 +29,6 @@ export default function App({ Component, pageProps }: AppProps) {
       <div className={`${outfit.variable} ${dmSans.variable} font-sans antialiased`}>
         <Component {...pageProps} />
       </div>
-    </>
+    </SessionProvider>
   );
 } 
