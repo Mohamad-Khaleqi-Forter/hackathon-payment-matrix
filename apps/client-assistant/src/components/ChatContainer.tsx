@@ -29,27 +29,22 @@ export const ChatContainer = () => {
 
   useEffect(() => {
     const initializeChat = async () => {
-      // Don't do anything if router is not ready yet
       if (!router.isReady) return;
 
       setIsInitializing(true);
       setError(null);
       
       try {
-        // Only create a new session if we're on the base chat route without an ID
         if (router.pathname === '/chats' && !sessionId) {
           const session = await api.createSession();
-          router.push(`/chats/${session.id}`, undefined, { shallow: true });
-          setMessages(session.messages);
+          router.push(`/chats/${session.session_id}`, undefined, { shallow: true });
         } else if (typeof sessionId === 'string') {
-          // Load existing session
-          const session = await api.getSession(sessionId);
-          setMessages(session.messages);
+          const history = await api.getChatHistory(sessionId);
+          setMessages(history);
         }
       } catch (error) {
         console.error('Failed to initialize chat:', error);
         setError('Failed to load chat session. Please try again or start a new chat.');
-        // Redirect to chats page after 3 seconds if session not found
         if (error instanceof Error && error.message.includes('404')) {
           setTimeout(() => {
             router.push('/chats');
@@ -80,25 +75,27 @@ export const ChatContainer = () => {
       setError(null);
       simulateTyping();
 
-      const message = await api.sendMessage(sessionId, text, true);
-      setMessages((prev) => [...prev, message]);
+      // Add user message to the UI immediately
+      const userMessage: ChatMessageType = {
+        role: 'user',
+        content: text
+      };
+      setMessages(prev => [...prev, userMessage]);
 
-      // The backend will automatically generate and send the AI response
-      // We'll need to poll for new messages or implement WebSocket for real-time updates
-      setTimeout(async () => {
-        try {
-          const updatedSession = await api.getSession(sessionId);
-          setMessages(updatedSession.messages);
-        } catch (error) {
-          console.error('Failed to get updated messages:', error);
-          setError('Failed to get AI response. Please try again.');
-        } finally {
-          setIsLoading(false);
-        }
-      }, 2000);
+      // Send message to API
+      const response = await api.sendMessage(sessionId, text);
+
+      // Add assistant response to the UI
+      const assistantMessage: ChatMessageType = {
+        role: 'assistant',
+        content: response.response
+      };
+      setMessages(prev => [...prev, assistantMessage]);
+      
     } catch (error) {
       console.error('Failed to send message:', error);
       setError('Failed to send message. Please try again.');
+    } finally {
       setIsLoading(false);
     }
   };
@@ -152,7 +149,7 @@ export const ChatContainer = () => {
                   </h1>
                   {sessionId && (
                     <p className="text-sm text-gray-500 font-sans">
-                      Session: {sessionId.slice(0, 8)}
+                      Session: {typeof sessionId === 'string' ? sessionId.slice(0, 8) : ''}
                     </p>
                   )}
                 </div>
@@ -202,9 +199,9 @@ export const ChatContainer = () => {
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-5xl mx-auto px-4 py-6 space-y-6">
           <AnimatePresence mode="popLayout">
-            {messages.map((message) => (
+            {messages.map((message, index) => (
               <motion.div
-                key={message.id}
+                key={index}
                 layout
                 variants={messageVariants}
                 initial="hidden"
@@ -217,9 +214,9 @@ export const ChatContainer = () => {
                 }}
               >
                 <ChatMessage
-                  message={message.text}
-                  isUser={message.isUser}
-                  timestamp={message.timestamp}
+                  message={message.content || ''}
+                  isUser={message.role === 'user'}
+                  timestamp={new Date().toISOString()}
                 />
               </motion.div>
             ))}
