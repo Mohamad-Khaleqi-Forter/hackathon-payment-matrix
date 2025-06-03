@@ -1,3 +1,8 @@
+interface Sale {
+  salePrice: number;
+  percentOff: number;
+}
+
 interface Shoe {
   id: string;
   name: string;
@@ -5,7 +10,10 @@ interface Shoe {
   price: number;
   currency: string;
   image: string;
+  size: string[];
   tags: string[];
+  bestSeller: boolean;
+  sale?: Sale;
 }
 
 export const shoes: Shoe[] = [
@@ -15,8 +23,14 @@ export const shoes: Shoe[] = [
     description: "Classic Addidas campus sneakers with a modern twist.",
     price: 89.99,
     currency: "USD",
-    image: "",
-    tags: ["sneakers", "shoes", "fashion", "addidas", "campus", "casual", "comfortable", "unisex", "blue"]
+    image: "https://images.unsplash.com/photo-1543508282-6319a3e2621f?w=500&q=80",
+    size: ["US 7", "US 8", "US 9", "US 10", "US 11"],
+    tags: ["sneakers", "shoes", "fashion", "addidas", "campus", "casual", "comfortable", "unisex", "blue"],
+    bestSeller: true,
+    sale: {
+      salePrice: 71.99,
+      percentOff: 20
+    }
   },
   {
     id: "prod_shoes_2",
@@ -24,8 +38,10 @@ export const shoes: Shoe[] = [
     description: "Retro-inspired Addidas SL 72 OG shoes with Liberty London print.", 
     price: 129.99,
     currency: "USD",
+    size: ["US 8", "US 9", "US 10", "US 11", "US 12"],
     tags: ["sneakers", "shoes", "fashion", "addidas", "comfortable", "trendy", "men",  "modern", "skyblue"],
-    image: ""
+    image: "https://images.unsplash.com/photo-1556048219-bb6978360b84?w=500&q=80",
+    bestSeller: false
   },
   {
     id: "prod_shoes_3",
@@ -34,7 +50,13 @@ export const shoes: Shoe[] = [
     tags: ["hiking", "shoes", "outdoor", "adventure", "waterproof", "durable", "comfortable", "unisex", "black"],
     price: 159.99,
     currency: "USD",
-    image: ""
+    size: ["US 7", "US 8", "US 9", "US 10", "US 11", "US 12"],
+    image: "https://images.unsplash.com/photo-1520639888713-7851133b1ed0?w=500&q=80",
+    bestSeller: true,
+    sale: {
+      salePrice: 119.99,
+      percentOff: 25
+    }
   },
   {
     id: "prod_shoes_4",
@@ -42,8 +64,10 @@ export const shoes: Shoe[] = [
     description: "Modern Nike Air Max with revolutionary Air unit for all-day comfort.",
     price: 149.99,
     currency: "USD",
+    size: ["US 6", "US 7", "US 8", "US 9", "US 10", "US 11"],
     image: "https://images.unsplash.com/photo-1514989940723-e8e51635b782?w=500&q=80",
-    tags: ["sneakers", "shoes", "fashion", "nike", "air max", "sporty", "comfortable", "unisex", "white"]
+    tags: ["sneakers", "shoes", "fashion", "nike", "air max", "sporty", "comfortable", "unisex", "white"],
+    bestSeller: true
   },
   {
     id: "prod_shoes_5",
@@ -51,8 +75,14 @@ export const shoes: Shoe[] = [
     description: "Responsive running shoes with Zoom Air cushioning for maximum performance.",
     price: 119.99,
     currency: "USD",
+    size: ["US 7", "US 8", "US 9", "US 10", "US 11", "US 12"],
     image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&q=80",
-    tags: ["running", "shoes", "sports", "nike", "zoom", "athletic", "comfortable", "unisex", "red"]
+    tags: ["running", "shoes", "sports", "nike", "zoom", "athletic", "comfortable", "unisex", "red"],
+    bestSeller: false,
+    sale: {
+      salePrice: 89.99,
+      percentOff: 25
+    }
   },
   {
     id: "prod_shoes_6",
@@ -60,8 +90,10 @@ export const shoes: Shoe[] = [
     description: "Bold and chunky Puma sneakers with RS technology for enhanced comfort.",
     price: 109.99,
     currency: "USD",
+    size: ["US 7", "US 8", "US 9", "US 10"],
     image: "https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=500&q=80",
-    tags: ["sneakers", "shoes", "fashion", "puma", "retro", "casual", "comfortable", "unisex", "white"]
+    tags: ["sneakers", "shoes", "fashion", "puma", "retro", "casual", "comfortable", "unisex", "white"],
+    bestSeller: false
   },
   {
     id: "prod_shoes_7",
@@ -69,13 +101,19 @@ export const shoes: Shoe[] = [
     description: "Iconic Puma Suede sneakers with timeless design and modern comfort.",
     price: 79.99,
     currency: "USD",
+    size: ["US 6", "US 7", "US 8", "US 9", "US 10", "US 11"],
     image: "https://images.unsplash.com/photo-1605034313761-73ea4a0cfbf3?w=500&q=80",
-    tags: ["sneakers", "shoes", "fashion", "puma", "suede", "classic", "comfortable", "unisex", "multicolor"]
+    tags: ["sneakers", "shoes", "fashion", "puma", "suede", "classic", "comfortable", "unisex", "multicolor"],
+    bestSeller: true,
+    sale: {
+      salePrice: 59.99,
+      percentOff: 25
+    }
   }
 ];
 
 // Export types
-export type { Shoe };
+export type { Shoe, Sale };
 
 // Helper functions
 export const getAllShoes = (): Shoe[] => shoes;
@@ -89,6 +127,18 @@ export const getShoesByBrand = (brand: string): Shoe[] =>
   );
 
 export const getShoesByPriceRange = (minPrice: number, maxPrice: number): Shoe[] =>
+  shoes.filter(shoe => {
+    const effectivePrice = shoe.sale ? shoe.sale.salePrice : shoe.price;
+    return effectivePrice >= minPrice && effectivePrice <= maxPrice;
+  });
+
+export const getShoesBySize = (size: string): Shoe[] =>
   shoes.filter(shoe => 
-    shoe.price >= minPrice && shoe.price <= maxPrice
-  ); 
+    shoe.size.includes(size.toUpperCase())
+  );
+
+export const getBestSellers = (): Shoe[] =>
+  shoes.filter(shoe => shoe.bestSeller);
+
+export const getOnSaleShoes = (): Shoe[] =>
+  shoes.filter(shoe => shoe.sale); 
