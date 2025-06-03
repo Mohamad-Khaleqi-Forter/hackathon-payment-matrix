@@ -38,6 +38,13 @@ export class ChatService {
       }),
     });
 
+    const mcpMerchantHelpers = await createMCPClient({
+      transport: new StdioMCPTransport({
+        command: "node",
+        args: [process.env.MCP_TOOLS_MERCHANT_HELPERS_PATH!],
+      }),
+    });
+
     const mcpForter = await createMCPClient({
       transport: new StdioMCPTransport({
         command: "node",
@@ -46,17 +53,19 @@ export class ChatService {
     });
 
     const toolMerchantShoes = await mcpMerchantShoes.tools();
+    const toolsMerchantHelpers = await mcpMerchantHelpers.tools();
     const toolMerchantTshirt = await mcpMerchantTshirt.tools();
     const toolForter = await mcpForter.tools();
 
     return {
       ...toolMerchantShoes,
       ...toolMerchantTshirt,
+      ...toolsMerchantHelpers,
       ...toolForter,
     };
   }
 
-  async generateResponse(session_id: string, text: string): Promise<string> {
+  async generateResponse(session_id: string, text: string) {
     try {
       // Add user message to history
       this.sessionService.addMessage(session_id, {
@@ -76,44 +85,37 @@ export class ChatService {
         tools: await this.getMCPTools(),
       });
 
-      let outputText = "";
+      console.log("Response from LLM:");
+      console.log(JSON.stringify(response));
 
-      // Iterate through steps to extract text and tool results
-      for (const step of response.steps) {
-        // Add any direct text output from the step
-        if (step.text) {
-          outputText += step.text + "\n\n";
-        }
+      let output: string | Record<string, any> =
+        response.text ?? "No response generated";
 
-        // Check for tool calls and their results
-        if (step.toolCalls && step.toolResults) {
-          for (const toolResult of step.toolResults) {
-            const toolName = toolResult.toolName;
-            const result = toolResult.result;
+      if (response.steps) {
+        output = response.steps.reverse().flatMap((step) => {
+          return step.toolResults.map((toolResult) => {
+            if (!toolResult.result || !toolResult.toolName) {
+              return {
+                toolName: toolResult.toolName ?? "Unknown Tool",
+                content: "No response generated",
+              };
+            }
 
-            // Format tool result as markdown
-            outputText += `### Tool Call: ${toolName}\n`;
-            outputText += `**Result**:\n\`\`\`\n${JSON.stringify(
-              result,
-              null,
-              2
-            )}\n\`\`\`\n\n`;
-          }
-        }
-      }
-
-      // If the final response has a summarized text, use it
-      if (response.text) {
-        outputText += `### Final Response\n${response.text}\n`;
+            return {
+              toolName: toolResult.toolName,
+              content: toolResult.result.content,
+            };
+          });
+        });
       }
 
       // Add assistant response to history
       this.sessionService.addMessage(session_id, {
         role: "assistant",
-        content: outputText,
+        content: output,
       });
 
-      return outputText || "No response generated";
+      return output;
     } catch (error) {
       console.error("Error generating response:", error);
       throw new Error("Failed to generate response from LLM");
