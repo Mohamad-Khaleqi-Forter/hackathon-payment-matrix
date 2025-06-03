@@ -1,15 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useRouter } from 'next/router';
+import { ChatMessage as ChatMessageType } from '../types/chat';
+import { api } from '../lib/api';
 import { ChatMessage } from './ChatMessage';
 import { ChatInput } from './ChatInput';
-import { SparklesIcon } from '@heroicons/react/24/solid';
-
-interface Message {
-  id: string;
-  text: string;
-  isUser: boolean;
-  timestamp: string;
-}
+import { SparklesIcon, ExclamationCircleIcon, ArrowLeftIcon } from '@heroicons/react/24/solid';
 
 const messageVariants = {
   hidden: { opacity: 0, y: 20, scale: 0.95 },
@@ -18,31 +14,57 @@ const messageVariants = {
 };
 
 export const ChatContainer = () => {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<ChatMessageType[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
+  const { id: sessionId } = router.query;
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   useEffect(() => {
-    setMounted(true);
-    const initialMessage: Message = {
-      id: '1',
-      text: 'Welcome to our AI-powered marketplace! How can I help you today?',
-      isUser: false,
-      timestamp: new Date().toLocaleTimeString(),
+    const initializeChat = async () => {
+      // Don't do anything if router is not ready yet
+      if (!router.isReady) return;
+
+      setIsInitializing(true);
+      setError(null);
+      
+      try {
+        // Only create a new session if we're on the base chat route without an ID
+        if (router.pathname === '/chats' && !sessionId) {
+          const session = await api.createSession();
+          router.push(`/chats/${session.id}`, undefined, { shallow: true });
+          setMessages(session.messages);
+        } else if (typeof sessionId === 'string') {
+          // Load existing session
+          const session = await api.getSession(sessionId);
+          setMessages(session.messages);
+        }
+      } catch (error) {
+        console.error('Failed to initialize chat:', error);
+        setError('Failed to load chat session. Please try again or start a new chat.');
+        // Redirect to chats page after 3 seconds if session not found
+        if (error instanceof Error && error.message.includes('404')) {
+          setTimeout(() => {
+            router.push('/chats');
+          }, 3000);
+        }
+      } finally {
+        setIsInitializing(false);
+      }
     };
-    console.log('Setting initial message:', initialMessage);
-    setMessages([initialMessage]);
-  }, []);
+
+    initializeChat();
+  }, [router.isReady, sessionId]);
 
   useEffect(() => {
     scrollToBottom();
-    console.log('Current messages:', messages);
   }, [messages]);
 
   const simulateTyping = () => {
@@ -51,79 +73,136 @@ export const ChatContainer = () => {
   };
 
   const handleSendMessage = async (text: string) => {
-    console.log('Sending message:', text);
-    const newMessage: Message = {
-      id: Date.now().toString(),
-      text,
-      isUser: true,
-      timestamp: new Date().toLocaleTimeString(),
-    };
+    if (!sessionId || typeof sessionId !== 'string') return;
 
-    setMessages(prev => {
-      console.log('Previous messages:', prev);
-      console.log('Adding new message:', newMessage);
-      return [...prev, newMessage];
-    });
-    
-    setIsLoading(true);
-    simulateTyping();
+    try {
+      setIsLoading(true);
+      setError(null);
+      simulateTyping();
 
-    // Simulate response
-    setTimeout(() => {
-      const response: Message = {
-        id: (Date.now() + 1).toString(),
-        text: "I understand you're looking for products. Let me help you with that. What specific items are you interested in?",
-        isUser: false,
-        timestamp: new Date().toLocaleTimeString(),
-      };
-      console.log('Adding response:', response);
-      setMessages(prev => [...prev, response]);
+      const message = await api.sendMessage(sessionId, text, true);
+      setMessages((prev) => [...prev, message]);
+
+      // The backend will automatically generate and send the AI response
+      // We'll need to poll for new messages or implement WebSocket for real-time updates
+      setTimeout(async () => {
+        try {
+          const updatedSession = await api.getSession(sessionId);
+          setMessages(updatedSession.messages);
+        } catch (error) {
+          console.error('Failed to get updated messages:', error);
+          setError('Failed to get AI response. Please try again.');
+        } finally {
+          setIsLoading(false);
+        }
+      }, 2000);
+    } catch (error) {
+      console.error('Failed to send message:', error);
+      setError('Failed to send message. Please try again.');
       setIsLoading(false);
-    }, 2000);
+    }
   };
 
-  if (!mounted) return null;
+  if (isInitializing) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[calc(100vh-8rem)] bg-transparent">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="flex flex-col items-center gap-6 p-8 glass rounded-2xl"
+        >
+          <div className="w-16 h-16 relative">
+            <div className="absolute inset-0 bg-indigo-500 rounded-full animate-ping opacity-20"></div>
+            <div className="relative w-full h-full border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+          </div>
+          <h2 className="text-xl font-semibold text-gray-800 font-display">
+            Loading your conversation...
+          </h2>
+          <p className="text-gray-500 font-sans">Please wait while we fetch your chat history</p>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-8rem)] bg-gray-50">
+    <div className="flex flex-col h-[calc(100vh-4rem)] bg-transparent relative">
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex items-center justify-between px-4 py-3 border-b border-gray-100 bg-white/80 backdrop-blur-sm sticky top-0 z-10"
+        className="glass sticky top-0 z-20 border-b border-gray-100"
       >
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-primary-500 to-secondary-500 flex items-center justify-center">
-            <SparklesIcon className="w-5 h-5 text-white" />
+        <div className="max-w-5xl mx-auto">
+          <div className="flex items-center justify-between px-6 py-4">
+            <div className="flex items-center gap-4">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => router.push('/chats')}
+                className="p-2 rounded-xl hover:bg-gray-100 transition-colors"
+              >
+                <ArrowLeftIcon className="w-5 h-5 text-gray-600" />
+              </motion.button>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center animate-float">
+                  <SparklesIcon className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-lg font-semibold font-display gradient-text">
+                    AI Shopping Assistant
+                  </h1>
+                  {sessionId && (
+                    <p className="text-sm text-gray-500 font-sans">
+                      Session: {sessionId.slice(0, 8)}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+            {isTyping && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-50 text-indigo-600"
+              >
+                <span className="text-sm font-medium font-sans">AI is thinking</span>
+                <motion.div
+                  animate={{
+                    opacity: [0.4, 1, 0.4],
+                    transition: { duration: 1.5, repeat: Infinity },
+                  }}
+                  className="flex gap-1"
+                >
+                  <span>•</span>
+                  <span>•</span>
+                  <span>•</span>
+                </motion.div>
+              </motion.div>
+            )}
           </div>
-          <span className="font-medium text-gray-900">AI Assistant</span>
         </div>
-        {isTyping && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="text-sm text-gray-500 flex items-center gap-2"
-          >
-            <span className="hidden sm:inline">AI is typing</span>
-            <motion.div
-              animate={{
-                opacity: [0.4, 1, 0.4],
-                transition: { duration: 1.5, repeat: Infinity },
-              }}
-              className="flex gap-1"
-            >
-              <span>•</span>
-              <span>•</span>
-              <span>•</span>
-            </motion.div>
-          </motion.div>
-        )}
       </motion.div>
 
-      <div className="flex-1 overflow-y-auto px-2 py-4 space-y-4">
-        <AnimatePresence mode="popLayout">
-          {messages.map((message) => {
-            console.log('Rendering message:', message);
-            return (
+      {error && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mx-4 mt-4"
+        >
+          <div className="max-w-5xl mx-auto">
+            <div className="bg-red-50 border-l-4 border-red-400 p-4 rounded-r-xl">
+              <div className="flex items-center gap-2 text-red-700">
+                <ExclamationCircleIcon className="w-5 h-5 flex-shrink-0" />
+                <p className="text-sm font-medium font-sans">{error}</p>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
+      <div className="flex-1 overflow-y-auto">
+        <div className="max-w-5xl mx-auto px-4 py-6 space-y-6">
+          <AnimatePresence mode="popLayout">
+            {messages.map((message) => (
               <motion.div
                 key={message.id}
                 layout
@@ -143,14 +222,18 @@ export const ChatContainer = () => {
                   timestamp={message.timestamp}
                 />
               </motion.div>
-            );
-          })}
-        </AnimatePresence>
-        <div ref={messagesEndRef} className="h-4" />
+            ))}
+          </AnimatePresence>
+          <div ref={messagesEndRef} className="h-4" />
+        </div>
       </div>
 
-      <div className="sticky bottom-0 z-10">
-        <ChatInput onSendMessage={handleSendMessage} isLoading={isLoading} />
+      <div className="sticky bottom-0 z-10 pb-4 pt-2 px-4 bg-gradient-to-t from-gray-50 to-transparent">
+        <div className="max-w-5xl mx-auto">
+          <div className="glass rounded-2xl p-1">
+            <ChatInput onSendMessage={handleSendMessage} isLoading={isLoading} />
+          </div>
+        </div>
       </div>
     </div>
   );
