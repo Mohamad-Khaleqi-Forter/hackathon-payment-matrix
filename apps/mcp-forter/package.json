@@ -3,8 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "tsc --project tsconfig.json",
-    "start": "node .build/forter-payments.js"
+    "build": "tsc --project tsconfig.json"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.12.1",
