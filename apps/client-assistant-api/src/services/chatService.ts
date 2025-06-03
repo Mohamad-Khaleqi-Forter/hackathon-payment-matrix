@@ -1,6 +1,6 @@
 import { generateText } from 'ai';
 import { google } from '@ai-sdk/google';
-import { ChatSessionService, Message } from './chatSessionService';
+import { ChatSessionService, Message, SessionInfo } from './chatSessionService';
 
 export class ChatService {
   private model: string = 'models/gemini-2.0-flash-exp';
@@ -44,5 +44,9 @@ export class ChatService {
 
   getSessionHistory(session_id: string): Message[] {
     return this.sessionService.getHistory(session_id);
+  }
+
+  getAllSessions(): SessionInfo[] {
+    return this.sessionService.getAllSessions();
   }
 } 

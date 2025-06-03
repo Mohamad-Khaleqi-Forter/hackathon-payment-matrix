@@ -8,6 +8,12 @@ interface ChatSession {
   lastActivity: Date;
 }
 
+export interface SessionInfo {
+  session_id: string;
+  messageCount: number;
+  lastActivity: Date;
+}
+
 export class ChatSessionService {
   private sessions: Map<string, ChatSession> = new Map();
 
@@ -52,5 +58,13 @@ export class ChatSessionService {
       const excessMessages = session.messages.length - this.MAX_MESSAGES_PER_SESSION;
       session.messages.splice(0, excessMessages);
     }
+  }
+
+  getAllSessions(): SessionInfo[] {
+    return Array.from(this.sessions.entries()).map(([session_id, session]) => ({
+      session_id,
+      messageCount: session.messages.length,
+      lastActivity: session.lastActivity
+    }));
   }
 } 
