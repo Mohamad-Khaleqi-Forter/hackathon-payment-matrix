@@ -11,7 +11,7 @@ const server = new mcp_js_1.McpServer({
         tools: {},
     },
 });
-server.tool("get-list-shoes", "show list of shoes in the shop", async () => {
+server.tool("get-list-shoes", "show list of available shoes in the shop", async () => {
     try {
         const allShoes = (0, merchant_shoes_1.getAllShoes)();
         return {

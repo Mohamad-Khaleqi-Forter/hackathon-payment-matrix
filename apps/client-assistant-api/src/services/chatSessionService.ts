@@ -1,6 +1,6 @@
 export interface Message {
   role: 'user' | 'assistant';
-  content: string;
+  content: string | Record<string, any>;
 }
 
 interface ChatSession {

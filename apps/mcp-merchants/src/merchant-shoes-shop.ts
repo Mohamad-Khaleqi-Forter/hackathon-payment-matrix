@@ -16,7 +16,7 @@ const server = new McpServer({
 
 server.tool(
   "get-list-shoes",
-  "show list of shoes in the shop",
+  "show list of available shoes in the shop",
   async () => {
     try {
       const allShoes = getAllShoes();
