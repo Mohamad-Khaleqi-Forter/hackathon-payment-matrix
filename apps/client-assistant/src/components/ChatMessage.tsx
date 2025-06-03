@@ -1,7 +1,5 @@
 import { motion } from 'framer-motion';
-import { clsx } from 'clsx';
 import { UserCircleIcon } from '@heroicons/react/24/solid';
-import { SparklesIcon } from '@heroicons/react/24/solid';
 
 interface ChatMessageProps {
   message: string;
@@ -10,79 +8,41 @@ interface ChatMessageProps {
 }
 
 export const ChatMessage = ({ message, isUser, timestamp }: ChatMessageProps) => {
-  console.log('ChatMessage props:', { message, isUser, timestamp });
-  
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20, scale: 0.95 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{
-        duration: 0.5,
-        type: "spring",
-        stiffness: 100,
-        damping: 15
-      }}
-      className={clsx(
-        'flex items-start gap-3 px-2',
-        isUser ? 'flex-row-reverse' : 'flex-row'
-      )}
+      layout
+      className={`flex ${isUser ? 'justify-end' : 'justify-start'} items-end gap-2`}
     >
-      <motion.div
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{ delay: 0.2 }}
-        className="flex-shrink-0 mt-1"
-      >
-        <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-primary-500 to-secondary-500 flex items-center justify-center text-white shadow-md">
-          {isUser ? (
-            <UserCircleIcon className="w-5 h-5" />
-          ) : (
-            <SparklesIcon className="w-5 h-5" />
-          )}
+      {!isUser && (
+        <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center flex-shrink-0">
+          <span className="text-white text-sm font-semibold font-display">AI</span>
         </div>
-      </motion.div>
-
-      <div className="flex flex-col gap-1 max-w-[80%]">
+      )}
+      
+      <div className={`flex flex-col ${isUser ? 'items-end' : 'items-start'} max-w-[80%]`}>
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.1 }}
-          className={clsx(
-            'text-xs text-gray-500',
-            isUser ? 'text-right' : 'text-left'
-          )}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className={`
+            relative px-4 py-3 rounded-2xl
+            ${isUser ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white' : 'glass'}
+            shadow-sm
+          `}
         >
+          <p className={`font-sans text-[15px] leading-relaxed ${isUser ? 'text-white' : 'text-gray-700'}`}>
+            {message}
+          </p>
+        </motion.div>
+        <span className="text-xs text-gray-400 mt-1 px-2 font-sans">
           {timestamp}
-        </motion.div>
-
-        <motion.div
-          whileHover={{ scale: 1.01 }}
-          className={clsx(
-            'relative rounded-2xl px-4 py-3 shadow-sm',
-            isUser
-              ? 'bg-gradient-to-r from-primary-600 to-primary-500'
-              : 'bg-white border border-gray-100'
-          )}
-        >
-          <div 
-            className={clsx(
-              'text-sm sm:text-base leading-relaxed whitespace-pre-wrap break-words',
-              isUser ? 'text-white' : 'text-gray-900'
-            )}
-          >
-            {message || 'No message content'}
-          </div>
-
-          <div
-            className={clsx(
-              'absolute top-4 w-2 h-2 transform rotate-45',
-              isUser
-                ? '-right-1 bg-primary-500'
-                : '-left-1 bg-white border border-gray-100'
-            )}
-          />
-        </motion.div>
+        </span>
       </div>
+
+      {isUser && (
+        <div className="w-8 h-8 rounded-xl bg-gray-100 flex items-center justify-center flex-shrink-0">
+          <UserCircleIcon className="w-6 h-6 text-gray-600" />
+        </div>
+      )}
     </motion.div>
   );
 }; 
