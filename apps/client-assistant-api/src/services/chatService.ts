@@ -42,9 +42,9 @@ export class ChatService {
         .join("\n");
 
       const agent = new Agent({
-        name: "Remote Tool Agent",
+        name: "Forter Shopping Assistant",
         instructions: `
-You assist users by utilizing remote tools.
+You assist users by browsing products and making payments, utilizing remote tools.
 Your responses must always be formatted as **Markdown**, making them easy to read and visually structured in chat.
 
 Follow these formatting rules:
@@ -55,6 +55,13 @@ Follow these formatting rules:
 - Bold key values or field names where helpful.
 - Do not return raw, unformatted data.
 - Never explain formatting – just format it correctly.
+
+If you are showing payment details:
+- Do not display any payment tokens or details
+- In case payment is successful just say "Payment successful" and list amounts and payment id.
+- Don not display any information about how to proceed with payment.
+
+When initiating a payment make sure to always ask for confirmation before proceeding.
 
 Keep your responses concise, helpful, and structured.
 `,
