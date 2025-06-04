@@ -8,16 +8,40 @@ interface ChatInputProps {
   isLoading?: boolean;
 }
 
+const MAX_HISTORY_SIZE = 50; // Maximum number of messages to store
+
 export const ChatInput = ({ onSendMessage, isLoading }: ChatInputProps) => {
   const [message, setMessage] = useState('');
   const [isFocused, setIsFocused] = useState(false);
+  const [messageHistory, setMessageHistory] = useState<string[]>([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  // Load message history from localStorage on component mount
+  useEffect(() => {
+    const savedHistory = localStorage.getItem('chatMessageHistory');
+    if (savedHistory) {
+      setMessageHistory(JSON.parse(savedHistory));
+    }
+  }, []);
+
+  const saveMessageToHistory = (newMessage: string) => {
+    const updatedHistory = [
+      newMessage,
+      ...messageHistory.filter(msg => msg !== newMessage) // Remove duplicates
+    ].slice(0, MAX_HISTORY_SIZE); // Limit size
+
+    setMessageHistory(updatedHistory);
+    localStorage.setItem('chatMessageHistory', JSON.stringify(updatedHistory));
+  };
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (message.trim() && !isLoading) {
+      saveMessageToHistory(message.trim());
       onSendMessage(message.trim());
       setMessage('');
+      setHistoryIndex(-1);
       // Reset textarea height
       if (inputRef.current) {
         inputRef.current.style.height = 'auto';
@@ -32,6 +56,22 @@ export const ChatInput = ({ onSendMessage, isLoading }: ChatInputProps) => {
         if (message.trim() && !isLoading) {
           handleSubmit(e as unknown as FormEvent);
         }
+      }
+    } else if (e.key === 'ArrowUp' && !e.shiftKey) {
+      e.preventDefault();
+      if (messageHistory.length > 0) {
+        const newIndex = historyIndex + 1;
+        if (newIndex < messageHistory.length) {
+          setHistoryIndex(newIndex);
+          setMessage(messageHistory[newIndex]);
+        }
+      }
+    } else if (e.key === 'ArrowDown' && !e.shiftKey) {
+      e.preventDefault();
+      if (historyIndex > -1) {
+        const newIndex = historyIndex - 1;
+        setHistoryIndex(newIndex);
+        setMessage(newIndex === -1 ? '' : messageHistory[newIndex]);
       }
     }
   };
@@ -67,7 +107,10 @@ export const ChatInput = ({ onSendMessage, isLoading }: ChatInputProps) => {
                 ref={inputRef}
                 rows={1}
                 value={message}
-                onChange={(e) => setMessage(e.target.value)}
+                onChange={(e) => {
+                  setMessage(e.target.value);
+                  if (historyIndex !== -1) setHistoryIndex(-1);
+                }}
                 onKeyDown={handleKeyDown}
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => setIsFocused(false)}
@@ -135,7 +178,7 @@ export const ChatInput = ({ onSendMessage, isLoading }: ChatInputProps) => {
           transition={{ delay: 0.2 }}
           className="mt-2 text-xs text-center text-gray-400"
         >
-          Press Enter to send, Shift + Enter for new line
+          Press Enter to send, Shift + Enter for new line, ↑↓ for message history
         </motion.div>
       </div>
     </motion.div>
