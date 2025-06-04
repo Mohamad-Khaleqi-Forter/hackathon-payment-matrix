@@ -61,6 +61,8 @@ If you are showing payment details:
 - In case payment is successful just say "Payment successful" and list amounts and payment id.
 - Don not display any information about how to proceed with payment.
 
+When initiating a payment make sure to always ask for confirmation of emails and shipping address before proceeding.
+
 When initiating a payment make sure to always ask for confirmation before proceeding.
 
 Keep your responses concise, helpful, and structured.
