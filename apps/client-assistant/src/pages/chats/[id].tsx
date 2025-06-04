@@ -54,10 +54,10 @@ export default function ChatPage() {
   const [selectedQuery, setSelectedQuery] = useState<string | null>(null);
 
   useEffect(() => {
-    if (status === "unauthenticated" && !isMockAuth) {
+    if (!session && !isMockAuth) {
       router.push('/auth/signin');
     }
-  }, [status, router, isMockAuth]);
+  }, [session, router, isMockAuth]);
 
   const handleSuggestionClick = (query: string) => {
     setSelectedQuery(query);
@@ -77,7 +77,7 @@ export default function ChatPage() {
     );
   }
 
-  if (status === "unauthenticated" && !isMockAuth) {
+  if (!session && !isMockAuth) {
     return null; // Will redirect in useEffect
   }
 
