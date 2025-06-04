@@ -65,7 +65,7 @@ server.tool(
     challengeOTP: z
     .number()
     .describe(
-      "3ds challenge OTP sent to user mobile phone"
+      "3DS challenge OTP sent to user mobile phone"
     ),
   },
   async ({ amount, currency }) => {
