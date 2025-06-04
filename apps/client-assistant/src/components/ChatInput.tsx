@@ -6,24 +6,28 @@ import clsx from 'clsx';
 interface ChatInputProps {
   onSendMessage: (message: string) => void;
   isLoading?: boolean;
+  initialValue?: string;
 }
 
 const MAX_HISTORY_SIZE = 50; // Maximum number of messages to store
 
-export const ChatInput = ({ onSendMessage, isLoading }: ChatInputProps) => {
-  const [message, setMessage] = useState('');
+export const ChatInput = ({ onSendMessage, isLoading, initialValue = '' }: ChatInputProps) => {
+  const [message, setMessage] = useState(initialValue);
   const [isFocused, setIsFocused] = useState(false);
   const [messageHistory, setMessageHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
-  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const localInputRef = useRef<HTMLTextAreaElement>(null);
 
-  // Load message history from localStorage on component mount
+  // Update message when initialValue changes
   useEffect(() => {
-    const savedHistory = localStorage.getItem('chatMessageHistory');
-    if (savedHistory) {
-      setMessageHistory(JSON.parse(savedHistory));
+    if (initialValue) {
+      setMessage(initialValue);
+      // If there's an initial value, submit it
+      if (initialValue.trim() && !isLoading) {
+        handleSubmit(new Event('submit') as any);
+      }
     }
-  }, []);
+  }, [initialValue]);
 
   const saveMessageToHistory = (newMessage: string) => {
     const updatedHistory = [
@@ -43,8 +47,9 @@ export const ChatInput = ({ onSendMessage, isLoading }: ChatInputProps) => {
       setMessage('');
       setHistoryIndex(-1);
       // Reset textarea height
-      if (inputRef.current) {
-        inputRef.current.style.height = 'auto';
+      if (localInputRef.current) {
+        localInputRef.current.style.height = 'auto';
+        localInputRef.current.style.height = `${localInputRef.current.scrollHeight}px`;
       }
     }
   };
@@ -78,9 +83,9 @@ export const ChatInput = ({ onSendMessage, isLoading }: ChatInputProps) => {
 
   // Auto-resize textarea
   useEffect(() => {
-    if (inputRef.current) {
-      inputRef.current.style.height = 'auto';
-      inputRef.current.style.height = `${inputRef.current.scrollHeight}px`;
+    if (localInputRef.current) {
+      localInputRef.current.style.height = 'auto';
+      localInputRef.current.style.height = `${localInputRef.current.scrollHeight}px`;
     }
   }, [message]);
 
@@ -104,7 +109,7 @@ export const ChatInput = ({ onSendMessage, isLoading }: ChatInputProps) => {
           >
             <div className="flex-grow relative">
               <textarea
-                ref={inputRef}
+                ref={localInputRef}
                 rows={1}
                 value={message}
                 onChange={(e) => {

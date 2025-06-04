@@ -16,7 +16,13 @@ const messageVariants = {
   exit: { opacity: 0, scale: 0.95 },
 };
 
-export const ChatContainer = () => {
+interface ChatContainerProps {
+  onFirstMessage?: () => void;
+  emptyState?: React.ReactNode;
+  initialMessage?: string | null;
+}
+
+export const ChatContainer = ({ onFirstMessage, emptyState, initialMessage }: ChatContainerProps) => {
   const [messages, setMessages] = useState<ChatMessageType[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
@@ -35,6 +41,13 @@ export const ChatContainer = () => {
     },
   });
   const isMockAuth = process.env.NEXT_PUBLIC_MOCK_AUTH === "true";
+
+  // Handle initial message
+  useEffect(() => {
+    if (initialMessage && !isLoading) {
+      handleSendMessage(initialMessage);
+    }
+  }, [initialMessage]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -95,7 +108,14 @@ export const ChatContainer = () => {
         role: 'user',
         content: text
       };
-      setMessages(prev => [...prev, userMessage]);
+      setMessages(prev => {
+        const newMessages = [...prev, userMessage];
+        // Call onFirstMessage if this is the first message
+        if (prev.length === 0 && onFirstMessage) {
+          onFirstMessage();
+        }
+        return newMessages;
+      });
 
       // Send message to API
       const response = await api.sendMessage(sessionId, text, session?.user?.email || '');
@@ -259,29 +279,33 @@ export const ChatContainer = () => {
 
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-5xl mx-auto px-4 py-6 space-y-6">
-          <AnimatePresence mode="popLayout">
-            {messages.map((message, index) => (
-              <motion.div
-                key={index}
-                layout
-                variants={messageVariants}
-                initial="hidden"
-                animate="visible"
-                exit="exit"
-                transition={{
-                  type: "spring",
-                  stiffness: 500,
-                  damping: 40,
-                }}
-              >
-                <ChatMessage
-                  message={message.content || ''}
-                  isUser={message.role === 'user'}
-                  timestamp={new Date().toISOString()}
-                />
-              </motion.div>
-            ))}
-          </AnimatePresence>
+          {messages.length === 0 && emptyState ? (
+            emptyState
+          ) : (
+            <AnimatePresence mode="popLayout">
+              {messages.map((message, index) => (
+                <motion.div
+                  key={index}
+                  layout
+                  variants={messageVariants}
+                  initial="hidden"
+                  animate="visible"
+                  exit="exit"
+                  transition={{
+                    type: "spring",
+                    stiffness: 500,
+                    damping: 40,
+                  }}
+                >
+                  <ChatMessage
+                    message={message.content || ''}
+                    isUser={message.role === 'user'}
+                    timestamp={new Date().toISOString()}
+                  />
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          )}
           <div ref={messagesEndRef} className="h-4" />
         </div>
       </div>
@@ -289,7 +313,11 @@ export const ChatContainer = () => {
       <div className="sticky bottom-0 z-10 pb-4 pt-2 px-4 bg-gradient-to-t from-gray-50 to-transparent">
         <div className="max-w-5xl mx-auto">
           <div className="glass rounded-2xl p-1">
-            <ChatInput onSendMessage={handleSendMessage} isLoading={isLoading} />
+            <ChatInput 
+              onSendMessage={handleSendMessage} 
+              isLoading={isLoading} 
+              initialValue={initialMessage || ''}
+            />
           </div>
         </div>
       </div>
