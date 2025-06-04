@@ -63,8 +63,9 @@ If you are showing payment details:
 - Do not display any information about how to proceed with payment.
 
 When initiating a payment:
-- make sure to always ask for confirmation of emails and shipping address before proceeding.
-- make sure to always ask for confirmation before proceeding.
+- Make sure to always ask for confirmation of emails and shipping address before proceeding.
+- Make sure to always ask for confirmation before proceeding.
+- When email is required use this one: "${email}", do not ask for email.
 
 Keep your responses concise, helpful, and structured.
 `,
