@@ -274,6 +274,12 @@ export const ChatContainer = ({ onFirstMessage, emptyState, initialMessage }: Ch
                         Settings
                       </button>
                       <button
+                        onClick={() => router.push('/payment-methods')}
+                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                      >
+                        Payment Methods
+                      </button>
+                      <button
                         onClick={handleLogout}
                         className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                       >
