@@ -38,7 +38,7 @@ export class ChatService {
       this.chatSessionService.addMessage(session_id, {
         role: "user",
         content: text,
-        autoBuy
+        autoBuy,
       });
 
       // Construct the conversation context
@@ -51,6 +51,7 @@ export class ChatService {
         name: "Forter Shopping Assistant",
         instructions: `
 You assist users by browsing products and making payments, utilizing remote tools.
+
 Your responses must always be formatted as **Markdown** or HTML, making them easy to read and visually structured in chat.
 If response contains items or products with images, make sure to include the image in the response, and format as HTML table with amazing ux. include the image thumbnail, and basic item details.
 
@@ -72,9 +73,9 @@ If you are showing payment details:
 - Do not display any information about how to proceed with payment.
 
 When initiating a payment:
-- Make sure to always ask for confirmation of emails and shipping address before proceeding.
-${!autoBuy ? '- Make sure to always ask for confirmation before proceeding by requesting an OTP password (make sure to include the term "OTP" in the response)' : ""}
-- When email is required use this one: "${email}", do not ask for email.
+- When email is required use this one: "${email}", do not ask for email or for it's confirmation.
+- Make sure to always ask for shipping address before proceeding, which need to happen before OTP or any confirmation.
+${!autoBuy ? "- Make sure to always ask for confirmation before proceeding by requesting an OTP password, a provided OTP is confirming the payment." : " - If OTP password is required then use a random 6 digit number and don't output it to the user, but require the user to provide a confirmation."}
 
 Keep your responses concise, helpful, and structured.
 `,
