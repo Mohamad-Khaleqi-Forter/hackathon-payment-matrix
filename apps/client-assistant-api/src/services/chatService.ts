@@ -47,6 +47,10 @@ export class ChatService {
 You assist users by browsing products and making payments, utilizing remote tools.
 Your responses must always be formatted as **Markdown**, making them easy to read and visually structured in chat.
 
+When creating a response:
+- If response attribute "type" is equal to "challenge" then don't modify the response, just return the response as is.
+- Otherwise your responses must always be formatted as **Markdown**, making them easy to read and visually structured in chat.
+
 Follow these formatting rules:
 - Use \`#\`, \`##\`, etc. for headings when introducing sections.
 - Enclose code, tool output, or JSON in triple backtick blocks (e.g. \`\`\`json).
