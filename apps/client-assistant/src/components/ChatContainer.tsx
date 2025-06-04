@@ -30,6 +30,7 @@ export const ChatContainer = ({ onFirstMessage, emptyState, initialMessage }: Ch
   const [isTyping, setIsTyping] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showOTPModal, setShowOTPModal] = useState(false);
+  const [autoBuy, setAutoBuy] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
@@ -41,6 +42,26 @@ export const ChatContainer = ({ onFirstMessage, emptyState, initialMessage }: Ch
     },
   });
   const isMockAuth = process.env.NEXT_PUBLIC_MOCK_AUTH === "true";
+
+  // Load autoBuy setting from localStorage
+  useEffect(() => {
+    const savedAutoBuy = localStorage.getItem('autoBuy');
+    if (savedAutoBuy !== null) {
+      setAutoBuy(savedAutoBuy === 'true');
+    }
+  }, []);
+
+  // Listen for autoBuy changes from settings page
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'autoBuy') {
+        setAutoBuy(e.newValue === 'true');
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
   // Handle initial message
   useEffect(() => {
@@ -106,7 +127,8 @@ export const ChatContainer = ({ onFirstMessage, emptyState, initialMessage }: Ch
       // Add user message to the UI immediately
       const userMessage: ChatMessageType = {
         role: 'user',
-        content: text
+        content: text,
+        autoBuy
       };
       setMessages(prev => {
         const newMessages = [...prev, userMessage];
@@ -118,7 +140,7 @@ export const ChatContainer = ({ onFirstMessage, emptyState, initialMessage }: Ch
       });
 
       // Send message to API
-      const response = await api.sendMessage(sessionId, text, session?.user?.email || '');
+      const response = await api.sendMessage(sessionId, text, session?.user?.email || '', autoBuy);
 
       // Check if response contains OTP request
       if (response.response.includes('OTP')) {
@@ -245,6 +267,12 @@ export const ChatContainer = ({ onFirstMessage, emptyState, initialMessage }: Ch
                       exit={{ opacity: 0, y: 10 }}
                       className="absolute right-0 mt-2 w-48 rounded-xl shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5"
                     >
+                      <button
+                        onClick={() => router.push('/settings')}
+                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                      >
+                        Settings
+                      </button>
                       <button
                         onClick={handleLogout}
                         className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"

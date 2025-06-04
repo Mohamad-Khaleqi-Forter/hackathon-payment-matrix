@@ -27,12 +27,13 @@ export class ChatService {
     }
   }
 
-  async generateResponse(session_id: string, text: string, email: string) {
+  async generateResponse(session_id: string, text: string, email: string, autoBuy: boolean = false) {
     try {
       // Add user message to history
       this.chatSessionService.addMessage(session_id, {
         role: "user",
         content: text,
+        autoBuy
       });
 
       // Construct the conversation context

@@ -1,6 +1,7 @@
 export interface ChatMessage {
   role: 'user' | 'assistant';
   content?: string;
+  autoBuy?: boolean;
 }
 
 export interface ChatSession {

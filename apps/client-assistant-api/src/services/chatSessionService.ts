@@ -2,6 +2,7 @@ export interface Message {
   role: 'user' | 'assistant';
   content: string;
   email?: string;
+  autoBuy?: boolean;
 }
 
 interface ChatSession {
