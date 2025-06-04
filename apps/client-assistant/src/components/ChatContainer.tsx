@@ -5,6 +5,7 @@ import { ChatMessage as ChatMessageType } from '../types/chat';
 import { api } from '../lib/api';
 import { ChatMessage } from './ChatMessage';
 import { ChatInput } from './ChatInput';
+import { OTPModal } from './OTPModal';
 import { SparklesIcon, ExclamationCircleIcon, ArrowLeftIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
 import { useSession, signOut } from 'next-auth/react';
 import Image from 'next/image';
@@ -22,6 +23,7 @@ export const ChatContainer = () => {
   const [error, setError] = useState<string | null>(null);
   const [isTyping, setIsTyping] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showOTPModal, setShowOTPModal] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
@@ -96,6 +98,11 @@ export const ChatContainer = () => {
       // Send message to API
       const response = await api.sendMessage(sessionId, text, session?.user?.email || '');
 
+      // Check if response contains OTP request
+      if (response.response.includes('OTP')) {
+        setShowOTPModal(true);
+      }
+
       // Add assistant response to the UI
       const assistantMessage: ChatMessageType = {
         role: 'assistant',
@@ -110,6 +117,10 @@ export const ChatContainer = () => {
       setIsLoading(false);
       setIsTyping(false);
     }
+  };
+
+  const handleOTPSubmit = (otp: string) => {
+    handleSendMessage(otp);
   };
 
   // Close menu when clicking outside
@@ -301,6 +312,12 @@ export const ChatContainer = () => {
           </div>
         </div>
       </div>
+
+      <OTPModal
+        isOpen={showOTPModal}
+        onClose={() => setShowOTPModal(false)}
+        onSubmit={handleOTPSubmit}
+      />
     </div>
   );
 }; 
