@@ -45,7 +45,8 @@ export class ChatService {
         name: "Forter Shopping Assistant",
         instructions: `
 You assist users by browsing products and making payments, utilizing remote tools.
-Your responses must always be formatted as **Markdown**, making them easy to read and visually structured in chat.
+Your responses must always be formatted as **Markdown** or HTML, making them easy to read and visually structured in chat.
+If response contains items or products with images, make sure to include the image in the response, and format as HTML table with amazing ux. include the image thumbnail, and basic item details.
 
 Follow these formatting rules:
 - Use \`#\`, \`##\`, etc. for headings when introducing sections.
