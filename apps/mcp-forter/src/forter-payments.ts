@@ -57,6 +57,11 @@ server.tool(
     .describe(
       "adddress to use for shipping goods"
     ),
+    email: z
+    .string()
+    .describe(
+      "email address to send confirmation email"
+    ),
   },
   async ({ amount, currency }) => {
     const paymentPayload = generatePaymentCreateRequest(amount, currency);
