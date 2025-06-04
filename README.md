@@ -22,9 +22,16 @@ pnpm build-apps
 pnpm start-apps
 ```
 
+Also make sure to start https://github.com/forter/payment-orchestration locally:
+
+- start using `tilt up -- --to-edit=orchestration`
+- make sure to configure stripe connector and create hyperswitch api key
+- created api key needs to be updated at [apps/orchestration/.env.local](https://github.com/forter/payment-orchestration/blob/main/apps/orchestration/.env.local#L5)
+- to reflect changes, stop (ctrl-c) and tilt up again (important, don't do tilt down)
+
 ## Usage
 
-Navigate http://localhost:3000/ \
+Navigate http://localhost:7000/ \
 Example prompts:
 
 - give me a list of tshirt
