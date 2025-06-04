@@ -62,11 +62,11 @@ server.tool(
     .describe(
       "email address to send confirmation email"
     ),
-    challengeOTP: z
-    .number()
-    .describe(
-      "3DS challenge OTP sent to user mobile phone"
-    ),
+    // challengeOTP: z
+    // .number()
+    // .describe(
+    //   "3DS challenge OTP sent to user mobile phone"
+    // ),
   },
   async ({ amount, currency }) => {
     const paymentPayload = generatePaymentCreateRequest(amount, currency);
