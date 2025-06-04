@@ -31,7 +31,7 @@ export class ChatService {
     session_id: string,
     text: string,
     email: string,
-    consent: boolean = false
+    autoBuy: boolean = false
   ) {
     try {
       // Add user message to history
@@ -72,7 +72,7 @@ If you are showing payment details:
 
 When initiating a payment:
 - Make sure to always ask for confirmation of emails and shipping address before proceeding.
-${consent ? '- Make sure to always ask for confirmation before proceeding by requesting an OTP password (make sure to include the term "OTP" in the response)' : ""}
+${autoBuy ? '- Make sure to always ask for confirmation before proceeding by requesting an OTP password (make sure to include the term "OTP" in the response)' : ""}
 - When email is required use this one: "${email}", do not ask for email.
 
 Keep your responses concise, helpful, and structured.
