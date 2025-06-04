@@ -27,18 +27,19 @@ export class ChatService {
     }
   }
 
-  async generateResponse(session_id: string, text: string) {
+  async generateResponse(session_id: string, text: string, email: string) {
     try {
       // Add user message to history
       this.chatSessionService.addMessage(session_id, {
         role: "user",
         content: text,
+        email: email,
       });
 
       // Construct the conversation context
       const conversationContext = this.chatSessionService
         .getHistory(session_id)
-        .map((msg) => `${msg.role}: ${msg.content}`)
+        .map((msg) => `${msg.role}: ${msg.content}${msg.email ? ` (${msg.email})` : ''}`)
         .join("\n");
 
       const agent = new Agent({

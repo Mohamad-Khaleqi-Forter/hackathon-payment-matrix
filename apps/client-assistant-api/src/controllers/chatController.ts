@@ -7,9 +7,9 @@ export class ChatController {
   async chatWithProduct(req: Request, res: Response) {
     try {
       const { session_id } = req.params;
-      const { text } = req.body;
+      const { text, email } = req.body;
 
-      const response = await chatService.generateResponse(session_id, text);
+      const response = await chatService.generateResponse(session_id, text, email);
       
       res.json({ response });
     } catch (error) {

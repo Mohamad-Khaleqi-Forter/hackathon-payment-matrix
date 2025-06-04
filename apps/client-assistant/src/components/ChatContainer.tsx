@@ -94,7 +94,7 @@ export const ChatContainer = () => {
       setMessages(prev => [...prev, userMessage]);
 
       // Send message to API
-      const response = await api.sendMessage(sessionId, text);
+      const response = await api.sendMessage(sessionId, text, session?.user?.email || '');
 
       // Add assistant response to the UI
       const assistantMessage: ChatMessageType = {

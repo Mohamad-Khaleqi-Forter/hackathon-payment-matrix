@@ -1,6 +1,7 @@
 export interface Message {
   role: 'user' | 'assistant';
   content: string;
+  email?: string;
 }
 
 interface ChatSession {

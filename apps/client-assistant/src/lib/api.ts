@@ -32,13 +32,13 @@ export const api = {
   },
 
   // Send a message in a chat session
-  sendMessage: async (sessionId: string, message: string): Promise<ChatResponse> => {
+  sendMessage: async (sessionId: string, message: string, email: string): Promise<ChatResponse> => {
     const response = await fetch(`${API_URL}/chat/${sessionId}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ text: message }),
+      body: JSON.stringify({ text: message, email }),
     });
     if (!response.ok) throw new Error('Failed to send message');
     return response.json();
