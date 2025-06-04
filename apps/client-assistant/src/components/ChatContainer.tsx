@@ -28,7 +28,12 @@ export const ChatContainer = () => {
   const userMenuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const { id: sessionId } = router.query;
-  const { data: session, status } = useSession();
+  const { data: session, status } = useSession({
+    required: true,
+    onUnauthenticated() {
+      router.push('/auth/signin');
+    },
+  });
   const isMockAuth = process.env.NEXT_PUBLIC_MOCK_AUTH === "true";
 
   const scrollToBottom = () => {
@@ -36,10 +41,7 @@ export const ChatContainer = () => {
   };
 
   useEffect(() => {
-    if (status === "unauthenticated" && !isMockAuth) {
-      router.push('/auth/signin');
-      return;
-    }
+    if (status === "loading") return;
 
     const initializeChat = async () => {
       if (!router.isReady || (status !== "authenticated" && !isMockAuth)) return;
@@ -164,11 +166,11 @@ export const ChatContainer = () => {
 
   return (
     <div className="flex flex-col h-[calc(100vh-4rem)] bg-transparent relative">
-    <motion.div
+      <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         className="glass sticky top-0 z-20 border-b border-gray-100"
-    >
+      >
         <div className="max-w-5xl mx-auto">
           <div className="flex items-center justify-between px-6 py-4">
             <div className="flex items-center gap-4">
@@ -193,76 +195,55 @@ export const ChatContainer = () => {
                       Session: {typeof sessionId === 'string' ? sessionId.slice(0, 8) : ''}
                     </p>
                   )}
-        </div>
-      </div>
-            </div>
-            <div className="flex items-center gap-4">
-              {isTyping && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-50 text-indigo-600"
-                >
-                  <span className="text-sm font-medium font-sans">AI is thinking</span>
-                  <motion.div
-                    animate={{
-                      opacity: [0.4, 1, 0.4],
-                      transition: { duration: 1.5, repeat: Infinity },
-                    }}
-                    className="flex gap-1"
-                  >
-                    <span>•</span>
-                    <span>•</span>
-                    <span>•</span>
-                  </motion.div>
-                </motion.div>
-              )}
-              {session?.user?.image && (
-                <div className="relative" ref={userMenuRef}>
-                  <button
-                    onClick={() => setShowUserMenu(!showUserMenu)}
-                    className="flex items-center gap-2 p-1 rounded-xl hover:bg-gray-50 transition-colors"
-                  >
-                    <span className="text-sm text-gray-600">{session.user.name}</span>
-                    <div className="relative w-8 h-8 rounded-full overflow-hidden">
-                      <Image
-                        src={session.user.image}
-                        alt={session.user.name || 'User profile'}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                    <ChevronDownIcon className={`w-4 h-4 text-gray-500 transition-transform ${showUserMenu ? 'rotate-180' : ''}`} />
-                  </button>
-                  
-                  <AnimatePresence>
-                    {showUserMenu && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 10 }}
-                        className="absolute right-0 mt-2 w-48 rounded-xl shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5"
-                      >
-                        <button
-                          onClick={handleLogout}
-                          className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                        >
-                          Sign out
-                        </button>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
                 </div>
-              )}
+              </div>
             </div>
+
+            {session?.user?.image && (
+              <div className="relative" ref={userMenuRef}>
+                <button
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                  className="flex items-center gap-2 p-1 rounded-xl hover:bg-gray-50 transition-colors"
+                >
+                  <span className="text-sm text-gray-600">{session.user.name}</span>
+                  <div className="relative w-8 h-8 rounded-full overflow-hidden">
+                    <Image
+                      src={session.user.image}
+                      alt={session.user.name || 'User profile'}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                  <ChevronDownIcon className={`w-4 h-4 text-gray-500 transition-transform ${showUserMenu ? 'rotate-180' : ''}`} />
+                </button>
+                
+                <AnimatePresence>
+                  {showUserMenu && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 10 }}
+                      className="absolute right-0 mt-2 w-48 rounded-xl shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5"
+                    >
+                      <button
+                        onClick={handleLogout}
+                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                      >
+                        Sign out
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )}
           </div>
         </div>
       </motion.div>
 
-          {error && (
-            <motion.div
+      {error && (
+        <motion.div
           initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
+          animate={{ opacity: 1, y: 0 }}
           className="mx-4 mt-4"
         >
           <div className="max-w-5xl mx-auto">
@@ -273,8 +254,8 @@ export const ChatContainer = () => {
               </div>
             </div>
           </div>
-            </motion.div>
-          )}
+        </motion.div>
+      )}
 
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-5xl mx-auto px-4 py-6 space-y-6">

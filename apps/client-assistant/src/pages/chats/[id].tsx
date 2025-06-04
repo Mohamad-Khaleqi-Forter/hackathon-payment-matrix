@@ -4,7 +4,12 @@ import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 
 export default function ChatPage() {
-  const { status } = useSession();
+  const { data: session, status } = useSession({
+    required: true,
+    onUnauthenticated() {
+      router.push('/auth/signin');
+    },
+  });
   const router = useRouter();
   const isMockAuth = process.env.NEXT_PUBLIC_MOCK_AUTH === "true";
 

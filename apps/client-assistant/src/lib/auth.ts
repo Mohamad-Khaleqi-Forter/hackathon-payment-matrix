@@ -1,5 +1,18 @@
 import { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
+import { JWT } from "next-auth/jwt";
+
+// Extend the built-in session types
+declare module "next-auth" {
+  interface Session {
+    user: {
+      id?: string;
+      name?: string | null;
+      email?: string | null;
+      image?: string | null;
+    };
+  }
+}
 
 const mockSession = {
   user: {
@@ -29,9 +42,12 @@ export const authOptions: NextAuthOptions = {
     signIn: "/auth/signin",
   },
   callbacks: {
-    async session({ session }) {
+    async session({ session, token }) {
       if (process.env.MOCK_AUTH === "true") {
         return mockSession;
+      }
+      if (token && session.user) {
+        session.user.id = token.id as string;
       }
       return session;
     },
