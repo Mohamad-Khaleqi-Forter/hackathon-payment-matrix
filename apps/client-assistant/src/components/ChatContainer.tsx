@@ -83,8 +83,8 @@ export const ChatContainer = () => {
 
     try {
       setIsLoading(true);
+      setIsTyping(true);
       setError(null);
-      simulateTyping();
 
       // Add user message to the UI immediately
       const userMessage: ChatMessageType = {
@@ -108,6 +108,7 @@ export const ChatContainer = () => {
       setError('Failed to send message. Please try again.');
     } finally {
       setIsLoading(false);
+      setIsTyping(false);
     }
   };
 
