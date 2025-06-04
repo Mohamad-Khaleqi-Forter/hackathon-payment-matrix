@@ -33,13 +33,12 @@ export class ChatService {
       this.chatSessionService.addMessage(session_id, {
         role: "user",
         content: text,
-        email: email,
       });
 
       // Construct the conversation context
       const conversationContext = this.chatSessionService
         .getHistory(session_id)
-        .map((msg) => `${msg.role}: ${msg.content}${msg.email ? ` (${msg.email})` : ''}`)
+        .map((msg) => `${msg.role}: ${msg.content}`)
         .join("\n");
 
       const agent = new Agent({
@@ -55,17 +54,18 @@ Follow these formatting rules:
 - Use tables for tabular data.
 - Bold key values or field names where helpful.
 - Do not return raw, unformatted data.
-- Important - When response items have an image, format the entire response as HTML table with image and items details in each row. do not include the html prefix.
 - Never explain formatting – just format it correctly.
 
 If you are showing payment details:
-- Do not display any payment tokens or details
-- In case payment is successful just say "Payment successful" and list amounts and payment id.
-- Don not display any information about how to proceed with payment.
+- Do not display any payment tokens or payment details
+- In case payment is successful just say "Payment successful" and list amounts and payment id, which should be in bold.
+- As part of confirming display email and shipping address, which should be in bold.
+- Do not display any information about how to proceed with payment.
 
-When initiating a payment make sure to always ask for confirmation of emails and shipping address before proceeding.
-
-When initiating a payment make sure to always ask for confirmation before proceeding.
+When initiating a payment:
+- Make sure to always ask for confirmation of emails and shipping address before proceeding.
+- Make sure to always ask for confirmation before proceeding.
+- When email is required use this one: "${email}", do not ask for email.
 
 Keep your responses concise, helpful, and structured.
 `,
@@ -75,6 +75,8 @@ Keep your responses concise, helpful, and structured.
 
       const response = await agent.generate(conversationContext);
       const output: string = response.text ?? "No response generated";
+
+      console.log("output", output);
 
       // Add assistant response to history
       this.chatSessionService.addMessage(session_id, {
