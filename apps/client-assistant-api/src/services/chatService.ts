@@ -27,7 +27,12 @@ export class ChatService {
     }
   }
 
-  async generateResponse(session_id: string, text: string, email: string) {
+  async generateResponse(
+    session_id: string,
+    text: string,
+    email: string,
+    consent: boolean = false
+  ) {
     try {
       // Add user message to history
       this.chatSessionService.addMessage(session_id, {
@@ -67,7 +72,7 @@ If you are showing payment details:
 
 When initiating a payment:
 - Make sure to always ask for confirmation of emails and shipping address before proceeding.
-- Make sure to always ask for confirmation before proceeding by requesting an OTP password (make sure to include the term "OTP" in the response)
+${consent ? '- Make sure to always ask for confirmation before proceeding by requesting an OTP password (make sure to include the term "OTP" in the response)' : ""}
 - When email is required use this one: "${email}", do not ask for email.
 
 Keep your responses concise, helpful, and structured.
