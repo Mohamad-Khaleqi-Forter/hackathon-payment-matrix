@@ -37,6 +37,7 @@ export const generatePaymentCreateRequest = (
       },
     },
     captureMethod: 'automatic',
+    confirm: true,
   };
 };
 
@@ -56,6 +57,7 @@ server.tool(
     const paymentPayload = generatePaymentCreateRequest(amount, currency);
     try {
       const PaymentResponse = await axios.post(`${FORTER_PAYMENTS_ORCHESTRATION_URL}/payments`, paymentPayload);
+      const ConfirmResponse = await axios.post(`${FORTER_PAYMENTS_ORCHESTRATION_URL}/payments/${PaymentResponse.data.id}/confirm`, {});
         
       return {
         content: [
