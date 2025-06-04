@@ -5,8 +5,8 @@ import { ChatMessage as ChatMessageType } from '../types/chat';
 import { api } from '../lib/api';
 import { ChatMessage } from './ChatMessage';
 import { ChatInput } from './ChatInput';
-import { SparklesIcon, ExclamationCircleIcon, ArrowLeftIcon } from '@heroicons/react/24/solid';
-import { useSession } from 'next-auth/react';
+import { SparklesIcon, ExclamationCircleIcon, ArrowLeftIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
+import { useSession, signOut } from 'next-auth/react';
 import Image from 'next/image';
 
 const messageVariants = {
@@ -21,7 +21,9 @@ export const ChatContainer = () => {
   const [isInitializing, setIsInitializing] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isTyping, setIsTyping] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const userMenuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const { id: sessionId } = router.query;
   const { data: session, status } = useSession();
@@ -109,6 +111,24 @@ export const ChatContainer = () => {
     }
   };
 
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setShowUserMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const handleLogout = async () => {
+    await signOut({ redirect: true, callbackUrl: '/auth/signin' });
+  };
+
   if (isInitializing) {
     return (
       <div className="flex flex-col items-center justify-center h-[calc(100vh-8rem)] bg-transparent">
@@ -186,16 +206,40 @@ export const ChatContainer = () => {
                 </motion.div>
               )}
               {session?.user?.image && (
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-600">{session.user.name}</span>
-                  <div className="relative w-8 h-8 rounded-full overflow-hidden">
-                    <Image
-                      src={session.user.image}
-                      alt={session.user.name || 'User profile'}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
+                <div className="relative" ref={userMenuRef}>
+                  <button
+                    onClick={() => setShowUserMenu(!showUserMenu)}
+                    className="flex items-center gap-2 p-1 rounded-xl hover:bg-gray-50 transition-colors"
+                  >
+                    <span className="text-sm text-gray-600">{session.user.name}</span>
+                    <div className="relative w-8 h-8 rounded-full overflow-hidden">
+                      <Image
+                        src={session.user.image}
+                        alt={session.user.name || 'User profile'}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                    <ChevronDownIcon className={`w-4 h-4 text-gray-500 transition-transform ${showUserMenu ? 'rotate-180' : ''}`} />
+                  </button>
+                  
+                  <AnimatePresence>
+                    {showUserMenu && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 10 }}
+                        className="absolute right-0 mt-2 w-48 rounded-xl shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5"
+                      >
+                        <button
+                          onClick={handleLogout}
+                          className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                        >
+                          Sign out
+                        </button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               )}
             </div>
