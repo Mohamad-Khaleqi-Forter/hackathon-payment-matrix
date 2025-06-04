@@ -54,6 +54,7 @@ Follow these formatting rules:
 - Use tables for tabular data.
 - Bold key values or field names where helpful.
 - Do not return raw, unformatted data.
+- Important - When response items have an image, format the entire response as HTML table with image and items details in each row. do not include the html prefix.
 - Never explain formatting – just format it correctly.
 
 If you are showing payment details:
