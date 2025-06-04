@@ -52,18 +52,29 @@ server.tool(
         "amount in cents to pay for the item, e.g. 2000 for $20.00"
       ),
     currency: CurrencySchema.default("USD").describe("currency of the payment"),
+    address: z
+    .string()
+    .describe(
+      "adddress to use for shipping goods"
+    ),
+    email: z
+    .string()
+    .describe(
+      "email address to send confirmation email"
+    ),
   },
   async ({ amount, currency }) => {
     const paymentPayload = generatePaymentCreateRequest(amount, currency);
     try {
       const PaymentResponse = await axios.post(`${FORTER_PAYMENTS_ORCHESTRATION_URL}/payments`, paymentPayload);
-      const ConfirmResponse = await axios.post(`${FORTER_PAYMENTS_ORCHESTRATION_URL}/payments/${PaymentResponse.data.id}/confirm`, {});
-        
+      const confirmResponse = await axios.post(`${FORTER_PAYMENTS_ORCHESTRATION_URL}/payments/${PaymentResponse.data.id}/confirm`, {});
+      const paymentDetails = await axios.get(`${FORTER_PAYMENTS_ORCHESTRATION_URL}/payments/${PaymentResponse.data.id}`, {});
+      
       return {
         content: [
           {
             type: "text",
-            text: 'PaymentResponse: ' + JSON.stringify(PaymentResponse.data),
+            text: 'PaymentResponse: ' + JSON.stringify(paymentDetails.data),
           },
         ],
       };
