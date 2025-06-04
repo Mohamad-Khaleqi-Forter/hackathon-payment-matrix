@@ -72,7 +72,7 @@ server.tool(
     const paymentPayload = generatePaymentCreateRequest(amount, currency);
     try {
       const PaymentResponse = await axios.post(`${FORTER_PAYMENTS_ORCHESTRATION_URL}/payments`, paymentPayload);
-      const confirmResponse = await axios.post(`${FORTER_PAYMENTS_ORCHESTRATION_URL}/payments/${PaymentResponse.data.id}/confirm`, {});
+      // const confirmResponse = await axios.post(`${FORTER_PAYMENTS_ORCHESTRATION_URL}/payments/${PaymentResponse.data.id}/confirm`, {});
       const paymentDetails = await axios.get(`${FORTER_PAYMENTS_ORCHESTRATION_URL}/payments/${PaymentResponse.data.id}`, {});
       
       return {
