@@ -14,7 +14,7 @@ const server = new McpServer({
 });
 
 const FORTER_PAYMENTS_ORCHESTRATION_URL = process.env.FORTER_PAYMENTS_ORCHESTRATION_URL || "http://localhost:3000";
-const CurrencySchema = z.enum(['USD', 'EUR' , 'GBP']); 
+const CurrencySchema = z.enum(['USD', 'EUR', 'GBP']);
 type CurrencyType = z.infer<typeof CurrencySchema>;
 export const generatePaymentCreateRequest = (
   amount: number = 2000,
@@ -26,7 +26,7 @@ export const generatePaymentCreateRequest = (
     amount,
     currency,
     paymentMethod: {
-      _orchestrationTokenAlias: 'mock',
+      _orchestrationTokenAlias: 'payments_orchestration_vSNyiYzjcp',
       type: 'card',
       card: {
         cardHolderName: 'Mihrdad',
@@ -53,15 +53,15 @@ server.tool(
       ),
     currency: CurrencySchema.default("USD").describe("currency of the payment"),
     address: z
-    .string()
-    .describe(
-      "adddress to use for shipping goods"
-    ),
+      .string()
+      .describe(
+        "adddress to use for shipping goods"
+      ),
     email: z
-    .string()
-    .describe(
-      "email address to send confirmation email"
-    ),
+      .string()
+      .describe(
+        "email address to send confirmation email"
+      ),
     // challengeOTP: z
     // .number()
     // .describe(
@@ -71,10 +71,18 @@ server.tool(
   async ({ amount, currency }) => {
     const paymentPayload = generatePaymentCreateRequest(amount, currency);
     try {
-      const PaymentResponse = await axios.post(`${FORTER_PAYMENTS_ORCHESTRATION_URL}/payments`, paymentPayload);
-      const confirmResponse = await axios.post(`${FORTER_PAYMENTS_ORCHESTRATION_URL}/payments/${PaymentResponse.data.id}/confirm`, {});
-      const paymentDetails = await axios.get(`${FORTER_PAYMENTS_ORCHESTRATION_URL}/payments/${PaymentResponse.data.id}`, {});
-      
+      const credentials = Buffer.from(`forter:forter`).toString('base64');
+      const headers = {
+        headers: {
+          'Authorization': `Basic ${credentials}`,
+          'x-forter-siteid': 'mockTenantId'
+        }
+      }
+
+      const PaymentResponse = await axios.post(`${FORTER_PAYMENTS_ORCHESTRATION_URL}/payments`, paymentPayload, headers);
+      // const confirmResponse = await axios.post(`${FORTER_PAYMENTS_ORCHESTRATION_URL}/payments/${PaymentResponse.data.id}/confirm`, {});
+      const paymentDetails = await axios.get(`${FORTER_PAYMENTS_ORCHESTRATION_URL}/payments/${PaymentResponse.data.id}`, headers);
+
       return {
         content: [
           {
